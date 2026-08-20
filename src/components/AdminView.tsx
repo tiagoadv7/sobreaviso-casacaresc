@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { Collaborator, SystemUser, UserRole } from '../types';
 import { useAuth } from '../auth/AuthContext';
-import { forceSyncInitialData, clearAllCollaborators, saveCollaborator } from '../firebase/db';
+import { forceSyncInitialData, clearAllCollaborators, saveCollaborator, syncCollaboratorsFromUsers } from '../firebase/db';
 import { PALETTE } from '../utils/constants';
 import { CustomSelect, SelectOption } from './CustomSelect';
 import { ConfirmModal } from './modals/ConfirmModal';
@@ -101,6 +101,13 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
   const [feedback, setFeedback] = useState<{ uid: string; msg: string; type: 'ok' | 'err' } | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  const [isLinkingCollabs, setIsLinkingCollabs] = useState(false);
+  const [linkCollabsStatus, setLinkCollabsStatus] = useState<string | null>(null);
+
+  const collaboratorIds = new Set(collaborators.map((c) => c.id));
+  const usersMissingCollaborator = users.filter(
+    (u) => !u.collaboratorId || !collaboratorIds.has(u.collaboratorId)
+  ).length;
 
   const showFeedback = (uid: string, msg: string, type: 'ok' | 'err' = 'ok') => {
     setFeedback({ uid, msg, type });
@@ -119,6 +126,25 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
       setTimeout(() => setSyncStatus(null), 4000);
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const handleLinkCollaborators = async () => {
+    setIsLinkingCollabs(true);
+    setLinkCollabsStatus(null);
+    try {
+      const created = await syncCollaboratorsFromUsers(users, collaborators);
+      setLinkCollabsStatus(
+        created > 0
+          ? `✓ ${created} colaborador${created !== 1 ? 'es' : ''} criado${created !== 1 ? 's' : ''} a partir dos usuários.`
+          : 'Todos os usuários já têm um colaborador vinculado.'
+      );
+      setTimeout(() => setLinkCollabsStatus(null), 4000);
+    } catch {
+      setLinkCollabsStatus('Erro ao gerar colaboradores. Verifique as regras do Firestore.');
+      setTimeout(() => setLinkCollabsStatus(null), 4000);
+    } finally {
+      setIsLinkingCollabs(false);
     }
   };
 
@@ -160,12 +186,36 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
           <span>{syncStatus}</span>
         </div>
       )}
+      {linkCollabsStatus && (
+        <div className="p-3 rounded-2xl bg-[#DEEDE0] text-[#084F42] border border-[#319685]/30 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+          <Users className="w-4 h-4 text-[#319685]" />
+          <span>{linkCollabsStatus}</span>
+        </div>
+      )}
+
+      {usersMissingCollaborator > 0 && (
+        <div className="p-3.5 rounded-2xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-medium flex items-center justify-between flex-wrap gap-2">
+          <span>
+            {usersMissingCollaborator} usuário{usersMissingCollaborator !== 1 ? 's' : ''} sem colaborador vinculado —
+            {usersMissingCollaborator !== 1 ? ' eles não aparecem' : ' ele não aparece'} na aba Colaboradores.
+          </span>
+          <button
+            type="button"
+            onClick={handleLinkCollaborators}
+            disabled={isLinkingCollabs}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition-all cursor-pointer disabled:opacity-60 shrink-0"
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>{isLinkingCollabs ? 'Gerando…' : 'Gerar colaboradores agora'}</span>
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center justify-between flex-wrap gap-2">
         <p className="text-xs text-neutral-500 font-medium">
           {users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''}
         </p>
-        
+
         <div className="flex items-center flex-wrap gap-2">
           <button
             type="button"
@@ -324,6 +374,7 @@ const CreateUserModal: React.FC<{
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [displayName, setDisplayName] = useState('');
+  const [matricula, setMatricula] = useState('');
   const [role, setRole] = useState<UserRole>('colaborador');
   const [collaboratorId, setCollaboratorId] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -355,7 +406,7 @@ const CreateUserModal: React.FC<{
         const newCollaboratorId = await saveCollaborator({
           name: displayName.trim(),
           role: '',
-          matricula: '',
+          matricula: matricula.trim(),
           contact: '',
           color: PALETTE[collaborators.length % PALETTE.length],
           status: 'ativo',
@@ -498,6 +549,18 @@ const CreateUserModal: React.FC<{
               placeholder="— Nenhum —"
             />
           </div>
+
+          {/* Matrícula do novo colaborador (só faz sentido quando um novo
+              colaborador vai ser criado — se um já existente foi selecionado
+              acima, a matrícula dele é editada na tela de Colaboradores). */}
+          {!collaboratorId && (
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-neutral-700">Matrícula (opcional)</label>
+              <input type="text" placeholder="Ex: 0007" value={matricula}
+                onChange={(e) => setMatricula(e.target.value)}
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+            </div>
+          )}
 
           <div className="flex gap-2.5 pt-4 border-t border-black/5">
             <button type="button" onClick={onClose}

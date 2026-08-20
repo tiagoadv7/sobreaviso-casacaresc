@@ -24,11 +24,15 @@ import {
   DaySchedule,
   SystemUser,
 } from '../types';
-import { INITIAL_COLLABORATORS, INITIAL_DEMAND_TYPES } from '../utils/constants';
+import { INITIAL_COLLABORATORS, INITIAL_DEMAND_TYPES, PALETTE } from '../utils/constants';
 
 // ─── Type aliases for Firestore documents ───────────────────────────────────
 
 type Unsubscribe = () => void;
+
+// Faixa Unicode dos sinais diacríticos combinantes (acentos), usada para
+// gerar slugs sem acento a partir de nomes normalizados em NFD.
+const NFD_MARKS_REGEX = new RegExp(`[${String.fromCharCode(0x300)}-${String.fromCharCode(0x36f)}]`, 'g');
 
 // ─── COLLABORATORS ───────────────────────────────────────────────────────────
 
@@ -69,6 +73,54 @@ export async function clearAllCollaborators(): Promise<number> {
   snap.docs.forEach((d) => batch.delete(d.ref));
   await batch.commit();
   return snap.size;
+}
+
+// Cria um registro de Collaborator para cada usuário do sistema que ainda não
+// tem um vínculo válido (nunca foi criado, ou apontava para um colaborador
+// já excluído) — usado para corrigir usuários que ficaram sem colaborador
+// (ex: criados antes da vinculação automática existir, ou órfãos após um
+// "Limpar todos" em Colaboradores).
+export async function syncCollaboratorsFromUsers(
+  users: SystemUser[],
+  collaborators: Collaborator[]
+): Promise<number> {
+  const existingIds = new Set(collaborators.map((c) => c.id));
+  const usersNeedingCollaborator = users.filter(
+    (u) => !u.collaboratorId || !existingIds.has(u.collaboratorId)
+  );
+  if (usersNeedingCollaborator.length === 0) return 0;
+
+  const batch = writeBatch(db);
+  let created = 0;
+
+  usersNeedingCollaborator.forEach((user) => {
+    const slug =
+      user.displayName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(NFD_MARKS_REGEX, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || `collab-${user.uid}`;
+    const id = existingIds.has(slug) ? `${slug}-${user.uid.slice(0, 5)}` : slug;
+    existingIds.add(id);
+
+    const newCollaborator: Collaborator = {
+      id,
+      name: user.displayName,
+      role: '',
+      matricula: '',
+      contact: '',
+      color: PALETTE[(collaborators.length + created) % PALETTE.length],
+      status: 'ativo',
+      note: '',
+    };
+    batch.set(doc(db, 'collaborators', id), newCollaborator);
+    batch.update(doc(db, 'users', user.uid), { collaboratorId: id });
+    created++;
+  });
+
+  await batch.commit();
+  return created;
 }
 
 // ─── CALLS ───────────────────────────────────────────────────────────────────
