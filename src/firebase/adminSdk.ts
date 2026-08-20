@@ -61,16 +61,22 @@ export async function adminCreateUser(
 
 /**
  * Envia email de redefinição de senha para o usuário.
- * O link aponta para o próprio domínio em que o app está rodando (ex: a URL
- * da Vercel em produção, ou localhost em desenvolvimento) para que a troca
- * de senha aconteça na tela do próprio sistema, não na página genérica do
- * Firebase. Esse domínio precisa estar em Firebase Console → Authentication
- * → Settings → Authorized domains.
+ * `url` é a "continue URL" para onde o Firebase manda o usuário depois de
+ * concluir a troca de senha. `handleCodeInApp` é só para apps mobile — em
+ * apps web deve ficar false, senão o Firebase pode não processar o link
+ * corretamente.
+ *
+ * Para o e-mail linkar DIRETO na tela do próprio sistema (em vez da página
+ * genérica do Firebase), é preciso configurar em Firebase Console →
+ * Authentication → Templates → "Redefinição de senha" → editar →
+ * "Personalizar URL de ação", apontando para o domínio de produção (ex:
+ * https://sobreaviso-casacaresc.vercel.app). Esse domínio também precisa
+ * estar em Authentication → Settings → Authorized domains.
  */
 export async function adminSendPasswordReset(email: string): Promise<void> {
   const { auth } = await import('./config');
   await fbSendReset(auth, email, {
     url: window.location.origin,
-    handleCodeInApp: true,
+    handleCodeInApp: false,
   });
 }
