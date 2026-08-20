@@ -46,8 +46,18 @@ export const DayModal: React.FC<DayModalProps> = ({
   useEffect(() => {
     if (daySchedule) {
       setCollaboratorId(daySchedule.collaboratorId);
-      setStart(daySchedule.start);
-      setEnd(daySchedule.end);
+      if (daySchedule.start && daySchedule.end) {
+        setStart(daySchedule.start);
+        setEnd(daySchedule.end);
+      } else {
+        // Horário padrão sugerido para um dia ainda sem plantão definido —
+        // o administrador pode alterar livremente antes de salvar. Dias de
+        // semana usam o plantão noturno usual (18h às 07:30h do dia
+        // seguinte); sábado e domingo usam plantão de 24h (07:30h às 07:30h).
+        const isWeekend = daySchedule.kind === 'fim_de_semana' || daySchedule.kind === 'apoio';
+        setStart(isWeekend ? '07:30' : '18:00');
+        setEnd('07:30');
+      }
     }
   }, [daySchedule]);
 
