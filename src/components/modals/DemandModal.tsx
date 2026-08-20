@@ -16,7 +16,7 @@ interface DemandModalProps {
   currentMonth: number;
   onClose: () => void;
   onSaveCall: (callData: Omit<CallRecord, 'id'>, existingId?: string) => void;
-  onAddNewDemandType: (label: string, color: string) => string;
+  onAddNewDemandType: (label: string, color: string) => Promise<string>;
 }
 
 export const DemandModal: React.FC<DemandModalProps> = ({
@@ -113,9 +113,9 @@ export const DemandModal: React.FC<DemandModalProps> = ({
     },
   ];
 
-  const handleCreateDemandType = () => {
+  const handleCreateDemandType = async () => {
     if (!newDemandLabel.trim()) return;
-    const newId = onAddNewDemandType(newDemandLabel.trim(), newDemandColor);
+    const newId = await onAddNewDemandType(newDemandLabel.trim(), newDemandColor);
     setDemandTypeId(newId);
     setNewDemandLabel('');
     setIsDemandPickerOpen(false);
