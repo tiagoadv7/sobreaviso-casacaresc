@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: verifica se está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function: busca dados do usuário atual
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    // Helper function: verifica se é administrador
+    function isAdmin() {
+      return isAuthenticated() && (
+        getUserData().role == 'admin' ||
+        request.auth.token.email == 'tiago.neves@casacaresc.org.br'
+      );
+    }
+    
+    // ─── USUÁRIOS (/users/{uid}) ─────────────────────────────────────────────
+    // Qualquer autenticado pode ler usuários (para identificação no sistema)
+    // Administrador pode criar/editar qualquer usuário
+    // Colaborador só pode editar seu próprio perfil (sem alterar a role para admin)
+    match /users/{uid} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin() || (
+        isAuthenticated() && 
+        request.auth.uid == uid &&
+        request.resource.data.role == resource.data.role // não pode se auto-promover a admin
+      );
+      allow delete: if isAdmin();
+    }
+    
+    // ─── COLABORADORES (/collaborators/{collabId}) ───────────────────────────
+    // Todos autenticados podem ler
+    // Admin pode criar, editar e excluir qualquer colaborador
+    // Colaborador vinculado pode atualizar seus dados de contato/observação
+    match /collaborators/{collabId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        getUserData().collaboratorId == collabId
+      );
+    }
+    
+    // ─── DEMANDAS E CHAMADOS (/calls/{callId}) ───────────────────────────────
+    // Todos autenticados podem ler e registrar chamados (para qualquer colaborador)
+    // Editar/excluir um chamado já existente: apenas admin ou o colaborador
+    // vinculado ao login que é dono daquele chamado
+    match /calls/{callId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin() || (
+        isAuthenticated() && getUserData().collaboratorId == resource.data.collaboratorId
+      );
+    }
+    
+    // ─── TIPOS DE DEMANDA (/demandTypes/{typeId}) ────────────────────────────
+    // Todos podem ler; qualquer autenticado pode adicionar nova tag; admin pode excluir
+    match /demandTypes/{typeId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+    
+    // ─── ESCALA / OVERRIDES (/scheduleOverrides/{date}) ──────────────────────
+    // Todos podem ler a escala; admin pode modificar turnos
+    match /scheduleOverrides/{date} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // ─── CONFIGURAÇÕES DO SISTEMA (/systemSettings/{docId}) ──────────────────
+    match /systemSettings/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}
