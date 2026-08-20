@@ -3,6 +3,25 @@ import { Eye, EyeOff, AlertCircle, Lock, Mail, ArrowLeft, Send, CheckCircle2 } f
 import { useAuth } from '../auth/AuthContext';
 
 type View = 'login' | 'forgot';
+type MissingField = 'email' | 'password' | 'both' | null;
+
+const MISSING_FIELD_COPY: Record<Exclude<MissingField, null>, { title: string; body: string; focusId: string }> = {
+  email: {
+    title: 'Insira seu e-mail',
+    body: 'Preencha o campo de e-mail para continuar.',
+    focusId: 'email',
+  },
+  password: {
+    title: 'Insira sua senha',
+    body: 'Preencha o campo de senha para continuar.',
+    focusId: 'password',
+  },
+  both: {
+    title: 'Preencha os campos',
+    body: 'Informe seu e-mail e sua senha para continuar.',
+    focusId: 'email',
+  },
+};
 
 export const LoginScreen: React.FC = () => {
   const { login, sendPasswordReset } = useAuth();
@@ -16,14 +35,16 @@ export const LoginScreen: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [shake, setShake] = useState(false);
-  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [missingField, setMissingField] = useState<MissingField>(null);
 
-  const getErrorMessage = (code: string, rawMsg?: string): string => {
+  const getErrorMessage = (code: string): string => {
     const messages: Record<string, string> = {
       'auth/configuration-not-found': 'O Firebase Authentication ainda não foi iniciado no seu projeto! No console do Firebase, vá em "Authentication" e clique no botão azul "Primeiros Passos" (Get Started) e ative "E-mail/senha".',
       'auth/operation-not-allowed': 'O provedor E-mail/Senha não está ativado no Firebase! Acesse o Firebase Console → Authentication → Sign-in method e ative "E-mail/senha".',
       'auth/user-not-found': 'E-mail não encontrado. Fale com o administrador para criar seu acesso.',
       'auth/wrong-password': 'Senha incorreta. Tente novamente.',
+      'auth/missing-password': 'Digite sua senha para entrar.',
+      'auth/missing-email': 'Digite seu e-mail para entrar.',
       'auth/invalid-email': 'E-mail inválido. Verifique o formato.',
       'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos.',
       'auth/user-disabled': 'Esta conta foi desativada. Contate o administrador.',
@@ -31,7 +52,7 @@ export const LoginScreen: React.FC = () => {
       'auth/network-request-failed': 'Sem conexão com a internet.',
       'auth/api-key-not-valid': 'API Key do Firebase inválida. Verifique o arquivo .env.',
     };
-    return messages[code] || (rawMsg ? `Erro (${code || 'desconhecido'}): ${rawMsg}` : 'Erro na autenticação. Verifique os dados e tente novamente.');
+    return messages[code] || 'Erro na autenticação. Verifique os dados e tente novamente.';
   };
 
   const goToView = (next: View) => {
@@ -42,8 +63,10 @@ export const LoginScreen: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emailInput.trim()) {
-      setShowEmailModal(true);
+    const emailMissing = !emailInput.trim();
+    const passwordMissing = !passwordInput;
+    if (emailMissing || passwordMissing) {
+      setMissingField(emailMissing && passwordMissing ? 'both' : emailMissing ? 'email' : 'password');
       return;
     }
     setError('');
@@ -54,8 +77,7 @@ export const LoginScreen: React.FC = () => {
       await login(emailInput.trim(), passwordInput);
     } catch (err: unknown) {
       const code = (err as { code?: string }).code ?? '';
-      const msg = (err as { message?: string }).message;
-      setError(getErrorMessage(code, msg));
+      setError(getErrorMessage(code));
       setShake(true);
       setTimeout(() => setShake(false), 600);
     } finally {
@@ -66,7 +88,7 @@ export const LoginScreen: React.FC = () => {
   const handleSendResetLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailInput.trim()) {
-      setShowEmailModal(true);
+      setMissingField('email');
       return;
     }
     setError('');
@@ -290,18 +312,22 @@ export const LoginScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal: e-mail obrigatório */}
-      {showEmailModal && (
+      {/* Modal: campo obrigatório não preenchido */}
+      {missingField && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
           <div className="bg-white rounded-3xl shadow-2xl border border-black/8 w-full max-w-xs mx-4 p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex flex-col items-center text-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-[#319685]/10 flex items-center justify-center">
-                <Mail className="w-6 h-6 text-[#319685]" />
+                {missingField === 'password' ? (
+                  <Lock className="w-6 h-6 text-[#319685]" />
+                ) : (
+                  <Mail className="w-6 h-6 text-[#319685]" />
+                )}
               </div>
               <div>
-                <h3 className="text-sm font-bold text-neutral-900">Insira seu e-mail</h3>
+                <h3 className="text-sm font-bold text-neutral-900">{MISSING_FIELD_COPY[missingField].title}</h3>
                 <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
-                  Preencha o campo de e-mail para continuar.
+                  {MISSING_FIELD_COPY[missingField].body}
                 </p>
               </div>
             </div>
@@ -309,8 +335,12 @@ export const LoginScreen: React.FC = () => {
               type="button"
               autoFocus
               onClick={() => {
-                setShowEmailModal(false);
-                document.getElementById(view === 'login' ? 'login-email' : 'forgot-email')?.focus();
+                const focusTarget = MISSING_FIELD_COPY[missingField].focusId;
+                setMissingField(null);
+                const inputId = focusTarget === 'password'
+                  ? 'login-password'
+                  : view === 'login' ? 'login-email' : 'forgot-email';
+                document.getElementById(inputId)?.focus();
               }}
               className="w-full py-2.5 rounded-2xl bg-[#319685] text-white text-xs font-bold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 transition-all cursor-pointer"
             >
