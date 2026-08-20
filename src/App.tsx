@@ -52,6 +52,7 @@ import { DayModal } from './components/modals/DayModal';
 import { DemandModal } from './components/modals/DemandModal';
 import { CollaboratorModal } from './components/modals/CollaboratorModal';
 import { ProfileModal } from './components/modals/ProfileModal';
+import { ConfirmModal } from './components/modals/ConfirmModal';
 
 /* ─── Loading screen ─── */
 function LoadingScreen({ displayName }: { displayName?: string } = {}) {
@@ -71,7 +72,7 @@ function LoadingScreen({ displayName }: { displayName?: string } = {}) {
 
 /* ─── Inner app (requires auth) ─── */
 function AppInner() {
-  const { session, isAdmin } = useAuth();
+  const { session, isAdmin, users } = useAuth();
   const role = session?.role ?? 'colaborador';
 
   const [currentTab, setCurrentTab] = useState<TabView>('dashboard');
@@ -84,6 +85,17 @@ function AppInner() {
   const [calls, setCalls] = useState<CallRecord[]>([]);
   const [scheduleOverrides, setScheduleOverrides] = useState<Record<string, Partial<DaySchedule>>>({});
   const [dataLoading, setDataLoading] = useState(true);
+
+  // Duração mínima da tela de boas-vindas: quando o Firestore já tem os
+  // dados em cache (comum para o admin, que acabou de rodar o seed check),
+  // os snapshots iniciais chegam quase instantaneamente e a mensagem de
+  // boas-vindas nunca chega a ser percebida. Isso garante um tempo mínimo
+  // de exibição independente da velocidade da resposta do Firestore.
+  const [minLoadTimeElapsed, setMinLoadTimeElapsed] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setMinLoadTimeElapsed(true), 700);
+    return () => clearTimeout(t);
+  }, []);
 
   // Toast feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -227,13 +239,28 @@ function AppInner() {
     showToast(existingId ? 'Colaborador atualizado.' : 'Colaborador adicionado com sucesso.');
   };
 
-  const handleDeleteCollaborator = async (collabId: string) => {
+  const [collabPendingDelete, setCollabPendingDelete] = useState<Collaborator | null>(null);
+  const [isDeletingCollab, setIsDeletingCollab] = useState(false);
+
+  const handleDeleteCollaborator = (collabId: string) => {
     if (!isAdmin) return;
     const target = collaborators.find((c) => c.id === collabId);
     if (!target) return;
-    if (!window.confirm(`Deseja realmente excluir ${target.name}?`)) return;
-    await dbDeleteCollaborator(collabId);
-    showToast('Colaborador excluído.');
+    setCollabPendingDelete(target);
+  };
+
+  const confirmDeleteCollaborator = async () => {
+    if (!collabPendingDelete) return;
+    setIsDeletingCollab(true);
+    try {
+      await dbDeleteCollaborator(collabPendingDelete.id);
+      showToast('Colaborador excluído.');
+      setCollabPendingDelete(null);
+    } catch {
+      showToast('Erro ao excluir colaborador.');
+    } finally {
+      setIsDeletingCollab(false);
+    }
   };
 
   // ─── Profile (own collaborator) ────────────────────────────────────────────
@@ -343,7 +370,7 @@ function AppInner() {
 
   // ─── Loading ───────────────────────────────────────────────────────────────
 
-  if (dataLoading) return <LoadingScreen displayName={session?.displayName} />;
+  if (dataLoading || !minLoadTimeElapsed) return <LoadingScreen displayName={session?.displayName} />;
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -466,6 +493,11 @@ function AppInner() {
       <CollaboratorModal
         isOpen={isCollabModalOpen}
         editingCollab={editingCollab}
+        linkedEmail={
+          editingCollab
+            ? users.find((u) => u.collaboratorId === editingCollab.id)?.email
+            : undefined
+        }
         onClose={() => setIsCollabModalOpen(false)}
         onSaveCollaborator={handleSaveCollaborator}
       />
@@ -474,6 +506,19 @@ function AppInner() {
         collaborator={ownCollaborator}
         onClose={() => setIsProfileModalOpen(false)}
         onSaveProfile={handleSaveProfile}
+      />
+      <ConfirmModal
+        isOpen={!!collabPendingDelete}
+        title="Excluir colaborador"
+        message={
+          collabPendingDelete
+            ? `Deseja realmente excluir ${collabPendingDelete.name}? Essa ação não pode ser desfeita.`
+            : ''
+        }
+        confirmLabel="Excluir"
+        loading={isDeletingCollab}
+        onConfirm={confirmDeleteCollaborator}
+        onClose={() => setCollabPendingDelete(null)}
       />
 
       {toastMessage && (
@@ -505,7 +550,10 @@ export default function App() {
 
 function AuthGate() {
   const { session, authLoading } = useAuth();
-  if (authLoading) return <LoadingScreen />;
+  // Para o admin, a checagem de seed inicial dos dados atrasa o fim do
+  // authLoading mesmo com a sessão já carregada — passar o nome aqui evita
+  // que a tela de boas-vindas pareça "sumir" nesse intervalo.
+  if (authLoading) return <LoadingScreen displayName={session?.displayName} />;
   if (!session) return <LoginScreen />;
   if (session.mustChangePassword) return <FirstAccessScreen />;
   return <AppInner />;

@@ -24,6 +24,7 @@ import { useAuth } from '../auth/AuthContext';
 import { forceSyncInitialData, clearAllCollaborators, saveCollaborator } from '../firebase/db';
 import { PALETTE } from '../utils/constants';
 import { CustomSelect, SelectOption } from './CustomSelect';
+import { ConfirmModal } from './modals/ConfirmModal';
 
 interface AdminViewProps {
   collaborators: Collaborator[];
@@ -602,13 +603,10 @@ const ColaboradoresAdminPanel: React.FC<{
 }> = ({ collaborators, onOpenModal, onDelete }) => {
   const [isClearing, setIsClearing] = useState(false);
   const [clearStatus, setClearStatus] = useState<string | null>(null);
+  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
 
   const handleClearAll = async () => {
-    if (collaborators.length === 0) return;
-    if (!window.confirm(
-      `Isso vai excluir permanentemente os ${collaborators.length} colaboradores cadastrados no Firestore. Deseja continuar?`
-    )) return;
-
+    setShowClearAllConfirm(false);
     setIsClearing(true);
     setClearStatus(null);
     try {
@@ -641,7 +639,7 @@ const ColaboradoresAdminPanel: React.FC<{
           <button
             id="admin-btn-clear-collabs"
             type="button"
-            onClick={handleClearAll}
+            onClick={() => setShowClearAllConfirm(true)}
             disabled={isClearing}
             className="flex items-center gap-1.5 px-4 py-2 rounded-2xl border border-[#E84A4E]/20 text-[#E84A4E] text-xs font-semibold hover:bg-[#E84A4E]/10 transition-all cursor-pointer disabled:opacity-60"
             title="Remove todos os colaboradores cadastrados no Firestore"
@@ -688,6 +686,16 @@ const ColaboradoresAdminPanel: React.FC<{
         </div>
       ))}
     </div>
+
+    <ConfirmModal
+      isOpen={showClearAllConfirm}
+      title="Limpar todos os colaboradores"
+      message={`Isso vai excluir permanentemente os ${collaborators.length} colaboradores cadastrados no Firestore. Deseja continuar?`}
+      confirmLabel="Excluir todos"
+      loading={isClearing}
+      onConfirm={handleClearAll}
+      onClose={() => setShowClearAllConfirm(false)}
+    />
   </div>
   );
 };

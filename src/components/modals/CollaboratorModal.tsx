@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Collaborator, CollaboratorStatus } from '../../types';
 import { PALETTE } from '../../utils/constants';
-import { X, CheckCircle2, UserX } from 'lucide-react';
+import { X, CheckCircle2, UserX, Mail } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../CustomSelect';
 
 interface CollaboratorModalProps {
   isOpen: boolean;
   editingCollab: Collaborator | null;
+  linkedEmail?: string;
   onClose: () => void;
   onSaveCollaborator: (
     collabData: Omit<Collaborator, 'id'>,
@@ -17,6 +18,7 @@ interface CollaboratorModalProps {
 export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
   isOpen,
   editingCollab,
+  linkedEmail,
   onClose,
   onSaveCollaborator,
 }) => {
@@ -115,6 +117,13 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
         {errorText && (
           <div className="text-xs text-red-600 bg-red-50 p-3 rounded-2xl border border-red-200">
             {errorText}
+          </div>
+        )}
+
+        {editingCollab && linkedEmail && (
+          <div className="flex items-center gap-2 text-xs text-[#084F42] bg-[#DEEDE0]/50 p-3 rounded-2xl border border-[#319685]/20">
+            <Mail className="w-3.5 h-3.5 text-[#319685] shrink-0" />
+            <span className="font-medium truncate">Conta de acesso vinculada: {linkedEmail}</span>
           </div>
         )}
 
