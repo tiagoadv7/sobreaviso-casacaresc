@@ -112,6 +112,7 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
   const candidateUsers = users.filter(
     (u) => u.role !== 'admin' && (!u.collaboratorId || !collaboratorIds.has(u.collaboratorId))
   );
+  const candidateUidSet = new Set(candidateUsers.map((u) => u.uid));
 
   const toggleCandidateSelection = (uid: string) => {
     setSelectedUids((prev) => {
@@ -211,61 +212,38 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
         </div>
       )}
 
-      {candidateUsers.length > 0 && (
-        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 space-y-3">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="text-xs font-semibold text-amber-800">
-              {candidateUsers.length} colaborador{candidateUsers.length !== 1 ? 'es' : ''} sem cadastro vinculado — selecione quem deve aparecer na aba Colaboradores.
-            </p>
-            <button
-              type="button"
-              onClick={toggleSelectAllCandidates}
-              className="text-[11px] font-semibold text-amber-700 hover:text-amber-900 underline underline-offset-2 cursor-pointer"
-            >
-              {selectedUids.size === candidateUsers.length ? 'Desmarcar todos' : 'Marcar todos'}
-            </button>
-          </div>
-
-          <div className="space-y-1.5">
-            {candidateUsers.map((u) => (
-              <label
-                key={u.uid}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/70 border border-amber-100 text-xs cursor-pointer hover:bg-white transition-colors"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedUids.has(u.uid)}
-                  onChange={() => toggleCandidateSelection(u.uid)}
-                  className="w-3.5 h-3.5 rounded accent-amber-600 cursor-pointer"
-                />
-                <span className="font-semibold text-neutral-800">{u.displayName}</span>
-                <span className="text-neutral-400 truncate">{u.email}</span>
-              </label>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleLinkCollaborators}
-            disabled={isLinkingCollabs || selectedUids.size === 0}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition-all cursor-pointer disabled:opacity-60"
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>
-              {isLinkingCollabs
-                ? 'Gerando…'
-                : `Gerar ${selectedUids.size > 0 ? selectedUids.size + ' ' : ''}colaborador${selectedUids.size !== 1 ? 'es' : ''} selecionado${selectedUids.size !== 1 ? 's' : ''}`}
-            </span>
-          </button>
-        </div>
-      )}
-
       <div className="flex items-center justify-between flex-wrap gap-2">
         <p className="text-xs text-neutral-500 font-medium">
           {users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''}
         </p>
 
         <div className="flex items-center flex-wrap gap-2">
+          {candidateUsers.length > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={toggleSelectAllCandidates}
+                className="text-[11px] font-semibold text-amber-700 hover:text-amber-900 underline underline-offset-2 cursor-pointer px-1"
+              >
+                {selectedUids.size === candidateUsers.length ? 'Desmarcar todos' : 'Marcar todos'}
+              </button>
+              <button
+                type="button"
+                onClick={handleLinkCollaborators}
+                disabled={isLinkingCollabs || selectedUids.size === 0}
+                title="Cria um colaborador vinculado para cada usuário marcado com 'Sem colaborador' na lista abaixo"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border border-amber-300 bg-amber-50 text-amber-700 text-xs font-semibold hover:bg-amber-100 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>
+                  {isLinkingCollabs
+                    ? 'Gerando…'
+                    : `Gerar colaborador${selectedUids.size !== 1 ? 'es' : ''}${selectedUids.size > 0 ? ` (${selectedUids.size})` : ''}`}
+                </span>
+              </button>
+            </>
+          )}
+
           <button
             type="button"
             onClick={handleSyncDatabase}
@@ -329,6 +307,22 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
                     {feedback.type === 'ok' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
                     {feedback.msg}
                   </span>
+                )}
+
+                {/* Sem colaborador vinculado — selecionar para gerar em lote */}
+                {candidateUidSet.has(u.uid) && (
+                  <label
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 text-[11px] font-semibold text-amber-700 cursor-pointer hover:bg-amber-100 transition-colors"
+                    title="Marcar para gerar um colaborador vinculado a este usuário"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedUids.has(u.uid)}
+                      onChange={() => toggleCandidateSelection(u.uid)}
+                      className="w-3.5 h-3.5 rounded accent-amber-600 cursor-pointer"
+                    />
+                    Sem colaborador
+                  </label>
                 )}
 
                 {/* Editar */}
