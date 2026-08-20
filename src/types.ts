@@ -67,4 +67,5 @@ export interface SystemUser {
   collaboratorId?: string;   // vinculado ao Collaborator.id
   disabled?: boolean;
   createdAt?: string;
+  mustChangePassword?: boolean; // true até o primeiro acesso definir uma senha própria
 }

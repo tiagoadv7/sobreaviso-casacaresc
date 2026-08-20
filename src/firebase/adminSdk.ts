@@ -35,7 +35,8 @@ export async function adminCreateUser(
     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
     const uid = cred.user.uid;
 
-    // Salva perfil no Firestore
+    // Salva perfil no Firestore — mustChangePassword força a pessoa a trocar
+    // a senha temporária definida pelo admin no primeiro acesso dela.
     const userProfile: SystemUser = {
       uid,
       email,
@@ -44,6 +45,7 @@ export async function adminCreateUser(
       collaboratorId: profile.collaboratorId,
       disabled: false,
       createdAt: new Date().toISOString(),
+      mustChangePassword: true,
     };
     await saveUserProfile(uid, userProfile);
 

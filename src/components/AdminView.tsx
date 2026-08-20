@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 import { Collaborator, SystemUser, UserRole } from '../types';
 import { useAuth } from '../auth/AuthContext';
-import { forceSyncInitialData, clearAllCollaborators } from '../firebase/db';
+import { forceSyncInitialData, clearAllCollaborators, saveCollaborator } from '../firebase/db';
+import { PALETTE } from '../utils/constants';
 import { CustomSelect, SelectOption } from './CustomSelect';
 
 interface AdminViewProps {
@@ -291,6 +292,7 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
           collaborators={collaborators}
           onClose={() => setShowCreateModal(false)}
           onCreate={createUser}
+          onLinkCollaborator={updateUserCollaboratorLink}
           onSendReset={sendPasswordReset}
         />
       )}
@@ -313,9 +315,10 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
 const CreateUserModal: React.FC<{
   collaborators: Collaborator[];
   onClose: () => void;
-  onCreate: (email: string, password: string, data: { displayName: string; role: UserRole; collaboratorId?: string }) => Promise<void>;
+  onCreate: (email: string, password: string, data: { displayName: string; role: UserRole; collaboratorId?: string }) => Promise<string>;
+  onLinkCollaborator: (uid: string, collaboratorId: string | null) => Promise<void>;
   onSendReset: (email: string) => Promise<void>;
-}> = ({ collaborators, onClose, onCreate, onSendReset }) => {
+}> = ({ collaborators, onClose, onCreate, onLinkCollaborator, onSendReset }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -336,11 +339,30 @@ const CreateUserModal: React.FC<{
     setIsOrphanConflict(false);
     setResetStatus('');
     try {
-      await onCreate(email.trim(), password, {
+      // Cria o usuário primeiro — só depois de confirmado que ele existe é
+      // que criamos o colaborador, para não sobrar um colaborador órfão no
+      // Firestore caso a criação do usuário falhe (ex: e-mail duplicado).
+      const uid = await onCreate(email.trim(), password, {
         displayName: displayName.trim(),
         role,
         collaboratorId: collaboratorId || undefined,
       });
+
+      // Se nenhum colaborador existente foi selecionado, cria um novo
+      // automaticamente com o mesmo nome e vincula ao usuário recém-criado.
+      if (!collaboratorId) {
+        const newCollaboratorId = await saveCollaborator({
+          name: displayName.trim(),
+          role: '',
+          matricula: '',
+          contact: '',
+          color: PALETTE[collaborators.length % PALETTE.length],
+          status: 'ativo',
+          note: '',
+        });
+        await onLinkCollaborator(uid, newCollaboratorId);
+      }
+
       onClose();
     } catch (err: unknown) {
       const code = (err as { code?: string }).code ?? '';
@@ -461,10 +483,13 @@ const CreateUserModal: React.FC<{
 
           {/* Vincular colaborador */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Vincular a colaborador (opcional)</label>
+            <label className="block text-xs font-semibold text-neutral-700">Vincular a colaborador existente (opcional)</label>
+            <p className="text-[11px] text-neutral-400 -mt-0.5">
+              Se deixar em "— Nenhum —", um colaborador novo com o nome acima é criado automaticamente.
+            </p>
             <CustomSelect
               options={[
-                { value: '', label: '— Nenhum —' },
+                { value: '', label: '— Nenhum — (criar novo automaticamente)' },
                 ...collaborators.map((c): SelectOption => ({ value: c.id, label: `${c.name} (${c.role})`, color: c.color })),
               ]}
               value={collaboratorId}

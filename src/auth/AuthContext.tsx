@@ -35,6 +35,7 @@ export interface AuthSession {
   role: UserRole;
   collaboratorId?: string;
   displayName: string;
+  mustChangePassword: boolean;
 }
 
 // ─── Context value ────────────────────────────────────────────────────────────
@@ -47,11 +48,12 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   changeMyPassword: (newPassword: string) => Promise<void>;
+  completeFirstAccess: (newPassword: string) => Promise<void>;
   createUser: (
     email: string,
     password: string,
     data: { displayName: string; role: UserRole; collaboratorId?: string }
-  ) => Promise<void>;
+  ) => Promise<string>;
   updateUserRole: (uid: string, role: UserRole) => Promise<void>;
   updateUserCollaboratorLink: (uid: string, collaboratorId: string | null) => Promise<void>;
   updateUserDisplayName: (uid: string, displayName: string) => Promise<void>;
@@ -120,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           role: profile.role,
           collaboratorId: profile.collaboratorId,
           displayName: profile.displayName,
+          mustChangePassword: profile.mustChangePassword ?? false,
         };
 
         setSession(newSession);
@@ -161,12 +164,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await fbUpdatePassword(auth.currentUser, newPassword);
   }, []);
 
+  // Primeiro acesso: define a senha definitiva no lugar da temporária e
+  // libera a entrada normal no sistema.
+  const completeFirstAccess = useCallback(async (newPassword: string) => {
+    if (!auth.currentUser) throw new Error('Nenhum usuário logado');
+    await fbUpdatePassword(auth.currentUser, newPassword);
+    await updateUserProfile(auth.currentUser.uid, { mustChangePassword: false });
+    setSession((prev) => prev ? { ...prev, mustChangePassword: false } : prev);
+  }, []);
+
   const createUser = useCallback(async (
     email: string,
     password: string,
     data: { displayName: string; role: UserRole; collaboratorId?: string }
   ) => {
-    await adminCreateUser(email, password, data);
+    return adminCreateUser(email, password, data);
   }, []);
 
   const updateUserRole = useCallback(async (uid: string, role: UserRole) => {
@@ -217,6 +229,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         logout,
         changeMyPassword,
+        completeFirstAccess,
         createUser,
         updateUserRole,
         updateUserCollaboratorLink,

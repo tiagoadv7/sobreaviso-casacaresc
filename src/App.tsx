@@ -40,6 +40,7 @@ import { Sidebar } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
 import { LoginScreen } from './components/LoginScreen';
 import { ResetPasswordScreen } from './components/ResetPasswordScreen';
+import { FirstAccessScreen } from './components/FirstAccessScreen';
 import { DashboardView } from './components/DashboardView';
 import { EscalaView } from './components/EscalaView';
 import { DemandasView } from './components/DemandasView';
@@ -53,13 +54,16 @@ import { CollaboratorModal } from './components/modals/CollaboratorModal';
 import { ProfileModal } from './components/modals/ProfileModal';
 
 /* ─── Loading screen ─── */
-function LoadingScreen() {
+function LoadingScreen({ displayName }: { displayName?: string } = {}) {
   return (
     <div
       className="min-h-screen w-full flex flex-col items-center justify-center gap-4"
       style={{ background: 'linear-gradient(135deg, #084F42 0%, #1e1e1c 50%, #084F42 100%)' }}
     >
       <div className="w-12 h-12 border-4 border-white/20 border-t-[#6BC0B2] rounded-full animate-spin" />
+      {displayName && (
+        <p className="text-white text-base font-bold -mb-1">Bem-vindo(a), {displayName}!</p>
+      )}
       <p className="text-white/70 text-sm font-medium">Carregando…</p>
     </div>
   );
@@ -280,7 +284,7 @@ function AppInner() {
       const rows: (string | number)[][] = calls.map((c) => {
         const collab = collaborators.find((x) => x.id === c.collaboratorId);
         const demand = demandTypes.find((x) => x.id === c.demandTypeId);
-        return [c.day, `${currentYear}-${pad(currentMonth + 1)}-${pad(c.day)}`,
+        return [c.day, `${pad(c.day)}/${pad(currentMonth + 1)}/${currentYear}`,
           collab?.name || '-', demand?.label || '-', c.contato || '-',
           c.beneficiario || '-', c.motivo || '-', c.inicio || '-', c.fim || '-',
           c.status === 'concluido' ? 'Concluído' : 'Pendente'];
@@ -297,7 +301,7 @@ function AppInner() {
     const headers = ['Dia', 'Data', 'Dia da semana', 'Semana', 'Colaborador', 'Início', 'Fim', 'Horas', 'Tipo'];
     const rows: (string | number)[][] = schedule.map((d) => {
       const collab = collaborators.find((x) => x.id === d.collaboratorId);
-      return [d.day, d.date, d.weekdayLabel, `Semana ${d.weekIndex}`,
+      return [d.day, `${pad(d.day)}/${pad(currentMonth + 1)}/${currentYear}`, d.weekdayLabel, `Semana ${d.weekIndex}`,
         collab?.name || '-', d.start, d.end, d.hours, d.kind];
     });
     return {
@@ -339,7 +343,7 @@ function AppInner() {
 
   // ─── Loading ───────────────────────────────────────────────────────────────
 
-  if (dataLoading) return <LoadingScreen />;
+  if (dataLoading) return <LoadingScreen displayName={session?.displayName} />;
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -450,6 +454,9 @@ function AppInner() {
         presetCollabId={presetCollabForCall}
         collaborators={collaborators}
         demandTypes={demandTypes}
+        schedule={schedule}
+        isAdmin={isAdmin}
+        ownCollaboratorId={session?.collaboratorId}
         currentYear={currentYear}
         currentMonth={currentMonth}
         onClose={() => setIsDemandModalOpen(false)}
@@ -500,5 +507,6 @@ function AuthGate() {
   const { session, authLoading } = useAuth();
   if (authLoading) return <LoadingScreen />;
   if (!session) return <LoginScreen />;
+  if (session.mustChangePassword) return <FirstAccessScreen />;
   return <AppInner />;
 }

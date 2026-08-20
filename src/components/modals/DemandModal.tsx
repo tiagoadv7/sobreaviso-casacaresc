@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Collaborator, DemandType, CallRecord, CallStatus } from '../../types';
+import { Collaborator, DemandType, CallRecord, CallStatus, DaySchedule } from '../../types';
 import { PALETTE, EXTRA_COLORS, WEEKDAY_LABELS } from '../../utils/constants';
 import { pad } from '../../utils/calc';
 import { X, ChevronDown, Tag, Clock, Calendar, User, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -12,6 +12,9 @@ interface DemandModalProps {
   presetCollabId?: string;
   collaborators: Collaborator[];
   demandTypes: DemandType[];
+  schedule: DaySchedule[];
+  isAdmin: boolean;
+  ownCollaboratorId?: string;
   currentYear: number;
   currentMonth: number;
   onClose: () => void;
@@ -26,6 +29,9 @@ export const DemandModal: React.FC<DemandModalProps> = ({
   presetCollabId,
   collaborators,
   demandTypes,
+  schedule,
+  isAdmin,
+  ownCollaboratorId,
   currentYear,
   currentMonth,
   onClose,
@@ -50,6 +56,22 @@ export const DemandModal: React.FC<DemandModalProps> = ({
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
+  // Dia atual do calendário como padrão ao abrir para um novo registro
+  // (só faz sentido quando o mês/ano em exibição é o mês/ano corrente).
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonth;
+  const todayAsDefaultDay = isCurrentMonth ? today.getDate() : 1;
+
+  // Colaborador (não admin) só registra demanda em dias/como o colaborador
+  // que o administrador escalou no calendário. Não se aplica a admin, nem a
+  // edição de um chamado já existente.
+  const isRestricted = !isAdmin && !editingCall;
+  const daysScheduledForOwnCollaborator = new Set(
+    schedule.filter((d) => d.collaboratorId === ownCollaboratorId).map((d) => d.day)
+  );
+  const noScheduledDays = isRestricted && daysScheduledForOwnCollaborator.size === 0;
+  const missingCollaboratorLink = isRestricted && !ownCollaboratorId;
+
   useEffect(() => {
     if (editingCall) {
       setDay(editingCall.day);
@@ -61,8 +83,25 @@ export const DemandModal: React.FC<DemandModalProps> = ({
       setInicio(editingCall.inicio || '');
       setFim(editingCall.fim || '');
       setStatus(editingCall.status);
+    } else if (isRestricted) {
+      const scheduledDays = Array.from(daysScheduledForOwnCollaborator).sort((a, b) => a - b);
+      const initialDay =
+        presetDay && daysScheduledForOwnCollaborator.has(presetDay)
+          ? presetDay
+          : scheduledDays.includes(todayAsDefaultDay)
+          ? todayAsDefaultDay
+          : scheduledDays[0] ?? todayAsDefaultDay;
+      setDay(initialDay);
+      setCollaboratorId(ownCollaboratorId || '');
+      setDemandTypeId(demandTypes[0]?.id || '');
+      setContato('');
+      setBeneficiario('');
+      setMotivo('');
+      setInicio('19:00');
+      setFim('19:30');
+      setStatus('pendente');
     } else {
-      setDay(presetDay || 1);
+      setDay(presetDay || todayAsDefaultDay);
       setCollaboratorId(presetCollabId || (collaborators[0]?.id || ''));
       setDemandTypeId(demandTypes[0]?.id || '');
       setContato('');
@@ -80,17 +119,21 @@ export const DemandModal: React.FC<DemandModalProps> = ({
 
   const currentDemand = demandTypes.find((d) => d.id === demandTypeId);
 
-  const dayOptions: SelectOption[] = Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
-    const dateObj = new Date(currentYear, currentMonth, d);
-    const wd = WEEKDAY_LABELS[dateObj.getDay()];
-    return {
-      value: d.toString(),
-      label: `${pad(d)}/${pad(currentMonth + 1)} · ${wd}`,
-      icon: <Calendar className="w-3.5 h-3.5 text-neutral-400" />,
-    };
-  });
+  const dayOptions: SelectOption[] = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+    .filter((d) => !isRestricted || daysScheduledForOwnCollaborator.has(d))
+    .map((d) => {
+      const dateObj = new Date(currentYear, currentMonth, d);
+      const wd = WEEKDAY_LABELS[dateObj.getDay()];
+      return {
+        value: d.toString(),
+        label: `${pad(d)}/${pad(currentMonth + 1)} · ${wd}`,
+        icon: <Calendar className="w-3.5 h-3.5 text-neutral-400" />,
+      };
+    });
 
-  const collaboratorOptions: SelectOption[] = collaborators.map((c) => ({
+  const collaboratorOptions: SelectOption[] = (
+    isRestricted ? collaborators.filter((c) => c.id === ownCollaboratorId) : collaborators
+  ).map((c) => ({
     value: c.id,
     label: c.name,
     color: c.color,
@@ -125,6 +168,10 @@ export const DemandModal: React.FC<DemandModalProps> = ({
     e.preventDefault();
     if (!day || !collaboratorId || !demandTypeId) {
       setErrorText('Por favor, selecione o dia, colaborador e tipo de demanda.');
+      return;
+    }
+    if (isRestricted && !daysScheduledForOwnCollaborator.has(day)) {
+      setErrorText('Você só pode registrar demandas em dias com plantão liberado pelo administrador.');
       return;
     }
 
@@ -176,6 +223,18 @@ export const DemandModal: React.FC<DemandModalProps> = ({
           </div>
         )}
 
+        {missingCollaboratorLink && (
+          <div className="text-xs text-amber-700 bg-amber-50 p-3 rounded-2xl border border-amber-200">
+            Sua conta não está vinculada a nenhum colaborador. Fale com o administrador para registrar demandas.
+          </div>
+        )}
+
+        {!missingCollaboratorLink && noScheduledDays && (
+          <div className="text-xs text-amber-700 bg-amber-50 p-3 rounded-2xl border border-amber-200">
+            Você não tem nenhum plantão liberado neste mês. Só é possível registrar uma demanda em um dia com plantão atribuído pelo administrador.
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Dia & Colaborador com Rounded Custom Selects */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -199,6 +258,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
                 options={collaboratorOptions}
                 value={collaboratorId}
                 onChange={(val) => setCollaboratorId(val)}
+                disabled={isRestricted}
                 placeholder="Selecione a colaboradora"
               />
             </div>
@@ -398,7 +458,8 @@ export const DemandModal: React.FC<DemandModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 transition-all cursor-pointer"
+              disabled={noScheduledDays || missingCollaboratorLink}
+              className="px-5 py-2 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Salvar demanda
             </button>
