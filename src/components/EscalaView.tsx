@@ -2,7 +2,7 @@ import React from 'react';
 import { Collaborator, DaySchedule, CallRecord } from '../types';
 import { MONTH_NAMES } from '../utils/constants';
 import { fmtHours } from '../utils/calc';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarRange, Clock } from 'lucide-react';
 import { CustomSelect, SelectOption } from './CustomSelect';
 
 interface EscalaViewProps {
@@ -11,12 +11,14 @@ interface EscalaViewProps {
   calls: CallRecord[];
   currentYear: number;
   currentMonth: number;
+  isAdmin: boolean;
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onSelectMonth: (month: number) => void;
   onSelectYear: (year: number) => void;
   onGoToToday: () => void;
   onOpenDayModal: (daySchedule: DaySchedule) => void;
+  onOpenWeekScheduleModal: () => void;
 }
 
 export const EscalaView: React.FC<EscalaViewProps> = ({
@@ -25,12 +27,14 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
   calls,
   currentYear,
   currentMonth,
+  isAdmin,
   onPrevMonth,
   onNextMonth,
   onSelectMonth,
   onSelectYear,
   onGoToToday,
   onOpenDayModal,
+  onOpenWeekScheduleModal,
 }) => {
   const activeCollabs = collaborators.filter((c) => c.status === 'ativo');
 
@@ -143,6 +147,17 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
           </button>
         </div>
 
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={onOpenWeekScheduleModal}
+            className="flex lg:hidden w-full items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 transition-all cursor-pointer"
+          >
+            <CalendarRange className="w-4 h-4" />
+            Adicionar escala da semana
+          </button>
+        )}
+
         {/* Desktop: navegação completa com selects de mês/ano */}
         <div className="hidden lg:flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2.5 flex-wrap">
@@ -191,9 +206,20 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
             </button>
           </div>
 
-          <div className="text-xs text-neutral-400 font-medium">
-            Clique em qualquer dia do calendário para editar o plantão e os chamados
-          </div>
+          {isAdmin ? (
+            <button
+              type="button"
+              onClick={onOpenWeekScheduleModal}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 transition-all cursor-pointer"
+            >
+              <CalendarRange className="w-4 h-4" />
+              Adicionar escala da semana
+            </button>
+          ) : (
+            <div className="text-xs text-neutral-400 font-medium">
+              Clique em qualquer dia do calendário para editar o plantão e os chamados
+            </div>
+          )}
         </div>
 
         {/* Legend */}

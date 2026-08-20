@@ -7,6 +7,14 @@ import {
 } from '../types';
 import { WEEKDAY_LABELS, MONTH_NAMES } from './constants';
 
+// Horário padrão sugerido por tipo de turno — plantão noturno nos dias de
+// semana, 24h aos sábados e domingos. Usado como ponto de partida ao
+// agendar um dia ou uma semana inteira; o administrador pode sempre editar.
+export function defaultShiftHoursForKind(kind: ShiftKind): { start: string; end: string } {
+  const isWeekend = kind === 'fim_de_semana' || kind === 'apoio';
+  return { start: isWeekend ? '07:30' : '18:00', end: '07:30' };
+}
+
 export function pad(n: number): string {
   return n.toString().padStart(2, '0');
 }

@@ -186,6 +186,18 @@ export async function deleteScheduleOverride(date: string): Promise<void> {
   await deleteDoc(doc(db, 'scheduleOverrides', date));
 }
 
+// Grava o plantão de vários dias de uma vez (usado ao montar a escala da
+// semana inteira no painel do admin, em vez de dia a dia).
+export async function saveWeekSchedule(
+  entries: { date: string; data: Partial<DaySchedule> }[]
+): Promise<void> {
+  const batch = writeBatch(db);
+  entries.forEach(({ date, data }) => {
+    batch.set(doc(db, 'scheduleOverrides', date), data, { merge: true });
+  });
+  await batch.commit();
+}
+
 // ─── USERS (perfis no Firestore) ────────────────────────────────────────────
 
 export function subscribeUsers(

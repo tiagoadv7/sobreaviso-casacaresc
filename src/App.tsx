@@ -32,6 +32,7 @@ import {
   saveDemandType,
   saveScheduleOverride,
   deleteScheduleOverride,
+  saveWeekSchedule,
 } from './firebase/db';
 
 import { AuthProvider, useAuth } from './auth/AuthContext';
@@ -49,6 +50,7 @@ import { ColaboradoresView } from './components/ColaboradoresView';
 import { AdminView } from './components/AdminView';
 
 import { DayModal } from './components/modals/DayModal';
+import { WeekScheduleModal } from './components/modals/WeekScheduleModal';
 import { DemandModal } from './components/modals/DemandModal';
 import { CollaboratorModal } from './components/modals/CollaboratorModal';
 import { ProfileModal } from './components/modals/ProfileModal';
@@ -184,6 +186,17 @@ function AppInner() {
     setPresetDayForCall(day);
     setPresetCollabForCall(collaboratorId);
     setIsDemandModalOpen(true);
+  };
+
+  // ─── Week Schedule Modal ────────────────────────────────────────────────────
+
+  const [isWeekScheduleModalOpen, setIsWeekScheduleModalOpen] = useState<boolean>(false);
+
+  const handleSaveWeekSchedule = async (
+    entries: { date: string; data: Partial<DaySchedule> }[]
+  ) => {
+    await saveWeekSchedule(entries);
+    showToast('Escala da semana salva com sucesso.');
   };
 
   // ─── Calls / Demands ───────────────────────────────────────────────────────
@@ -414,12 +427,14 @@ function AppInner() {
               calls={calls}
               currentYear={currentYear}
               currentMonth={currentMonth}
+              isAdmin={isAdmin}
               onPrevMonth={handlePrevMonth}
               onNextMonth={handleNextMonth}
               onSelectMonth={setCurrentMonth}
               onSelectYear={setCurrentYear}
               onGoToToday={handleGoToToday}
               onOpenDayModal={handleOpenDayModal}
+              onOpenWeekScheduleModal={() => setIsWeekScheduleModalOpen(true)}
             />
           )}
           {safeTab === 'chamados' && (
@@ -473,6 +488,15 @@ function AppInner() {
         onClearDay={handleClearDay}
         onOpenNewCallForDay={handleOpenNewCallForDay}
         onDeleteCall={handleDeleteCall}
+      />
+      <WeekScheduleModal
+        isOpen={isWeekScheduleModalOpen}
+        schedule={schedule}
+        collaborators={collaborators}
+        currentYear={currentYear}
+        currentMonth={currentMonth}
+        onClose={() => setIsWeekScheduleModalOpen(false)}
+        onSaveWeek={handleSaveWeekSchedule}
       />
       <DemandModal
         isOpen={isDemandModalOpen}
