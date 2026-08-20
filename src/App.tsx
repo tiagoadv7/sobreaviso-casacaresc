@@ -320,13 +320,13 @@ function AppInner() {
     }
 
     if (currentTab === 'chamados') {
-      const headers = ['Dia', 'Data', 'Colaborador', 'Demanda', 'Contato', 'Beneficiário', 'Motivo', 'Início', 'Fim', 'Status'];
+      const headers = ['Dia', 'Data', 'Colaborador', 'Demanda', 'Contato', 'Beneficiário', 'Motivo', 'Observação', 'Início', 'Fim', 'Status'];
       const rows: (string | number)[][] = calls.map((c) => {
         const collab = collaborators.find((x) => x.id === c.collaboratorId);
         const demand = demandTypes.find((x) => x.id === c.demandTypeId);
         return [c.day, `${pad(c.day)}/${pad(currentMonth + 1)}/${currentYear}`,
           collab?.name || '-', demand?.label || '-', c.contato || '-',
-          c.beneficiario || '-', c.motivo || '-', c.inicio || '-', c.fim || '-',
+          c.beneficiario || '-', c.motivo || '-', c.observacao || '-', c.inicio || '-', c.fim || '-',
           c.status === 'concluido' ? 'Concluído' : 'Pendente'];
       });
       return {

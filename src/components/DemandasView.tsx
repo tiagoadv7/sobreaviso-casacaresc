@@ -52,7 +52,8 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
       const matchContact = c.contato?.toLowerCase().includes(q);
       const matchBeneficiary = c.beneficiario?.toLowerCase().includes(q);
       const matchReason = c.motivo?.toLowerCase().includes(q);
-      if (!matchContact && !matchBeneficiary && !matchReason) return false;
+      const matchNote = c.observacao?.toLowerCase().includes(q);
+      if (!matchContact && !matchBeneficiary && !matchReason && !matchNote) return false;
     }
     return true;
   });
@@ -225,7 +226,8 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
                 <th className="py-2.5 px-3">Demanda</th>
                 <th className="py-2.5 px-3">Contato</th>
                 <th className="py-2.5 px-3">Beneficiário</th>
-                <th className="py-2.5 px-3">Motivo / Obs</th>
+                <th className="py-2.5 px-3">Motivo</th>
+                <th className="py-2.5 px-3">Observação</th>
                 <th className="py-2.5 px-3">Início</th>
                 <th className="py-2.5 px-3">Fim</th>
                 <th className="py-2.5 px-3">Duração</th>
@@ -290,6 +292,10 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
 
                       <td className="py-3 px-3 text-neutral-500 truncate max-w-[140px] italic">
                         {call.motivo || '-'}
+                      </td>
+
+                      <td className="py-3 px-3 text-neutral-500 truncate max-w-[140px] italic">
+                        {call.observacao || '-'}
                       </td>
 
                       <td className="py-3 px-3 text-neutral-600 tabular-nums">

@@ -44,6 +44,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
   const [contato, setContato] = useState<string>('');
   const [beneficiario, setBeneficiario] = useState<string>('');
   const [motivo, setMotivo] = useState<string>('');
+  const [observacao, setObservacao] = useState<string>('');
   const [inicio, setInicio] = useState<string>('');
   const [fim, setFim] = useState<string>('');
   const [status, setStatus] = useState<CallStatus>('pendente');
@@ -80,6 +81,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
       setContato(editingCall.contato || '');
       setBeneficiario(editingCall.beneficiario || '');
       setMotivo(editingCall.motivo || '');
+      setObservacao(editingCall.observacao || '');
       setInicio(editingCall.inicio || '');
       setFim(editingCall.fim || '');
       setStatus(editingCall.status);
@@ -97,6 +99,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
       setContato('');
       setBeneficiario('');
       setMotivo('');
+      setObservacao('');
       setInicio('19:00');
       setFim('19:30');
       setStatus('pendente');
@@ -107,6 +110,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
       setContato('');
       setBeneficiario('');
       setMotivo('');
+      setObservacao('');
       setInicio('19:00');
       setFim('19:30');
       setStatus('pendente');
@@ -183,6 +187,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
         contato: contato.trim(),
         beneficiario: beneficiario.trim(),
         motivo: motivo.trim(),
+        observacao: observacao.trim(),
         inicio,
         fim,
         status,
@@ -400,6 +405,20 @@ export const DemandModal: React.FC<DemandModalProps> = ({
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
               className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+            />
+          </div>
+
+          {/* Observação */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-neutral-700">
+              Observação (opcional)
+            </label>
+            <textarea
+              placeholder="Detalhes adicionais sobre o atendimento..."
+              value={observacao}
+              onChange={(e) => setObservacao(e.target.value)}
+              rows={2}
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs resize-none"
             />
           </div>
 

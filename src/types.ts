@@ -27,6 +27,7 @@ export interface CallRecord {
   contato: string;
   beneficiario: string;
   motivo: string;
+  observacao: string;
   inicio: string; // "19:10"
   fim: string;    // "19:40"
   status: CallStatus;
