@@ -144,6 +144,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <div className="space-y-7">
+      {/* Cadastrar Demanda — no mobile fica no topo, antes de tudo */}
+      <button
+        type="button"
+        onClick={onOpenNewCallModal}
+        className="lg:hidden w-full inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-2xl bg-[#319685] text-white text-sm font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 cursor-pointer transition-all"
+      >
+        <Plus className="w-4 h-4" />
+        <span>Cadastrar Demanda</span>
+      </button>
+
       {/* 5 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* KPI 1 */}
@@ -239,7 +249,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* SECTION 1: PAINEL ANALÍTICO COMPLETO DE DEMANDAS E ATENDIMENTOS */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-[#319685]" />
             <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-800">
@@ -250,7 +260,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <button
             type="button"
             onClick={onOpenNewCallModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 cursor-pointer transition-all"
+            className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 cursor-pointer transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>+ Cadastrar Demanda</span>
@@ -483,13 +493,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* SECTION 3: TABELA DE ÚLTIMAS DEMANDAS */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs overflow-x-auto hover:border-black/20 transition-all">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div>
             <h3 className="text-sm font-bold text-neutral-900">Últimas Demandas Registradas</h3>
             <p className="text-xs text-neutral-400">Histórico recente de solicitações atendidas</p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center flex-wrap gap-3">
             <button
               type="button"
               onClick={onOpenNewCallModal}

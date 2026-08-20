@@ -164,7 +164,7 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
           {users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''}
         </p>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center flex-wrap gap-2">
           <button
             type="button"
             onClick={handleSyncDatabase}
@@ -611,7 +611,7 @@ const ColaboradoresAdminPanel: React.FC<{
       <p className="text-xs text-neutral-500 font-medium">
         {collaborators.length} colaborador{collaborators.length !== 1 ? 'es' : ''} cadastrado{collaborators.length !== 1 ? 's' : ''}
       </p>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center flex-wrap gap-2">
         {collaborators.length > 0 && (
           <button
             id="admin-btn-clear-collabs"
@@ -634,15 +634,15 @@ const ColaboradoresAdminPanel: React.FC<{
 
     <div className="space-y-2">
       {collaborators.map((c) => (
-        <div key={c.id} className="flex items-center justify-between bg-neutral-50 border border-black/5 rounded-2xl px-4 py-3.5">
-          <div className="flex items-center gap-3">
+        <div key={c.id} className="flex items-center justify-between flex-wrap gap-2 bg-neutral-50 border border-black/5 rounded-2xl px-4 py-3.5">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
               style={{ backgroundColor: c.color }}>
               {c.name.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <p className="text-xs font-semibold text-neutral-900">{c.name}</p>
-              <p className="text-[11px] text-neutral-400">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-neutral-900 truncate">{c.name}</p>
+              <p className="text-[11px] text-neutral-400 truncate">
                 {c.role} · Mat. {c.matricula} ·{' '}
                 <span className={c.status === 'ativo' ? 'text-emerald-600' : 'text-[#E84A4E]'}>
                   {c.status === 'ativo' ? 'Ativo' : 'Em licença'}
@@ -650,7 +650,7 @@ const ColaboradoresAdminPanel: React.FC<{
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button id={`admin-edit-collab-${c.id}`} type="button" onClick={() => onOpenModal(c.id)}
               className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-black/10 text-[11px] font-semibold text-neutral-600 hover:bg-neutral-100 transition-colors cursor-pointer">
               <Pencil className="w-3 h-3" /> Editar

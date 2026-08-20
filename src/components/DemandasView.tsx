@@ -121,7 +121,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
       {/* Filter and Search Bar com Rounded Selects */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex items-end gap-3.5 flex-wrap hover:border-black/20 transition-all">
         {/* Search */}
-        <div className="flex flex-col gap-1.5 flex-1 min-w-[220px]">
+        <div className="flex flex-col gap-1.5 w-full sm:flex-1 sm:min-w-[220px]">
           <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
             Buscar por nome / beneficiário
           </label>
@@ -138,7 +138,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
         </div>
 
         {/* Colaborador */}
-        <div className="flex flex-col gap-1.5 min-w-[190px]">
+        <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[190px]">
           <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
             Colaborador
           </label>
@@ -151,7 +151,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
         </div>
 
         {/* Demanda */}
-        <div className="flex flex-col gap-1.5 min-w-[190px]">
+        <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[190px]">
           <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
             Demanda
           </label>
@@ -164,7 +164,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
         </div>
 
         {/* Status */}
-        <div className="flex flex-col gap-1.5 min-w-[160px]">
+        <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[160px]">
           <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
             Status
           </label>
@@ -189,7 +189,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
       </div>
 
       {/* Summary Chips */}
-      <div className="flex items-center gap-3 text-xs text-neutral-600 font-medium">
+      <div className="flex items-center flex-wrap gap-3 text-xs text-neutral-600 font-medium">
         <span className="bg-white px-3.5 py-1.5 rounded-2xl border border-black/10 shadow-2xs">
           Exibindo <b>{totalCalls}</b> demandas
         </span>

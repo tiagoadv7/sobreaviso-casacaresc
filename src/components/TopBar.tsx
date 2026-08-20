@@ -72,14 +72,22 @@ export const TopBar: React.FC<TopBarProps> = ({
   const isAdmin = role === 'admin';
 
   return (
-    <header className="flex items-center justify-between gap-4 flex-wrap px-7 py-4 bg-white border-b border-black/[0.06] rounded-t-[28px] shrink-0">
-      <div>
-        <h1 id="page-title" className="text-xl font-bold text-neutral-900 tracking-tight">
-          {currentInfo.title}
-        </h1>
-        <p id="page-subtitle" className="text-xs text-neutral-500 mt-0.5 font-medium">
-          {currentInfo.subtitle}
-        </p>
+    <header className="px-4 sm:px-7 py-4 bg-white border-b border-black/[0.06] rounded-t-[28px] shrink-0">
+      {/* Logo — só no mobile, acima e centralizada */}
+      <div className="lg:hidden flex justify-center pb-3">
+        <img src="/logo.svg" alt="Casacaresc" className="w-32 h-auto" />
+      </div>
+
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="min-w-0">
+          <h1 id="page-title" className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight truncate">
+            {currentInfo.title}
+          </h1>
+          <p id="page-subtitle" className="text-xs text-neutral-500 mt-0.5 font-medium truncate">
+            {currentInfo.subtitle}
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-2.5">
@@ -92,7 +100,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-semibold bg-[#319685] text-white hover:bg-[#084F42] shadow-sm shadow-[#319685]/30 transition-all cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Adicionar colaborador</span>
+            <span className="hidden sm:inline">Adicionar colaborador</span>
           </button>
         )}
 
@@ -105,7 +113,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-semibold bg-[#319685] text-white hover:bg-[#084F42] shadow-sm shadow-[#319685]/30 transition-all cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Novo registro</span>
+            <span className="hidden sm:inline">Novo registro</span>
           </button>
         )}
 
@@ -120,7 +128,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-medium bg-[#fcfcfb] text-neutral-800 border border-black/10 hover:bg-[#f4f4f1] transition-all duration-200 cursor-pointer shadow-2xs active:scale-[0.97]"
               >
                 <Download className="w-3.5 h-3.5 text-neutral-500" />
-                <span>Exportar</span>
+                <span className="hidden sm:inline">Exportar</span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${isExportOpen ? 'rotate-180' : ''}`}
                 />
@@ -157,10 +165,11 @@ export const TopBar: React.FC<TopBarProps> = ({
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-medium bg-neutral-900 text-white hover:bg-neutral-800 transition-all cursor-pointer shadow-2xs"
             >
               <Printer className="w-3.5 h-3.5 text-neutral-300" />
-              <span>Imprimir / PDF</span>
+              <span className="hidden sm:inline">Imprimir / PDF</span>
             </button>
           </>
         )}
+      </div>
       </div>
     </header>
   );

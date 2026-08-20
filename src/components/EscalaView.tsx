@@ -111,7 +111,40 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
     <div className="space-y-6">
       {/* Month Navigator Toolbar + Legend */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs space-y-4 hover:border-black/20 transition-all">
-        <div className="flex items-center justify-between flex-wrap gap-3">
+        {/* Mobile: só mês/ano + navegação esquerda/direita */}
+        <div className="flex lg:hidden items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onPrevMonth}
+            className="p-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer shadow-2xs shrink-0"
+            title="Mês anterior"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={onGoToToday}
+            className="flex flex-col items-center gap-0.5 cursor-pointer"
+          >
+            <span className="text-sm font-bold text-neutral-800">
+              {MONTH_NAMES[currentMonth]} {currentYear}
+            </span>
+            <span className="text-[11px] font-semibold text-[#319685]">Hoje</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onNextMonth}
+            className="p-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer shadow-2xs shrink-0"
+            title="Próximo mês"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Desktop: navegação completa com selects de mês/ano */}
+        <div className="hidden lg:flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2.5 flex-wrap">
             <button
               type="button"
@@ -182,7 +215,8 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs hover:border-black/20 transition-all">
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs hover:border-black/20 transition-all overflow-x-auto">
+        <div className="min-w-[640px]">
         {/* Days of week header */}
         <div className="grid grid-cols-7 gap-3 text-center text-xs font-bold text-neutral-400 mb-3">
           <div className="py-1">Segunda</div>
@@ -249,6 +283,7 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
               </button>
             );
           })}
+        </div>
         </div>
       </div>
 

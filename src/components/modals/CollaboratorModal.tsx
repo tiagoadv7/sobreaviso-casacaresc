@@ -149,7 +149,7 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
           </div>
 
           {/* Matrícula & Contato */}
-          <div className="grid grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-neutral-700">
                 Matrícula

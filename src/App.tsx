@@ -363,7 +363,7 @@ function AppInner() {
           onOpenNewCollaboratorModal={() => handleOpenCollaboratorModal()}
         />
 
-        <main className="p-7 flex-1 overflow-y-auto bg-white rounded-b-[28px]">
+        <main className="p-4 sm:p-7 flex-1 overflow-y-auto bg-white rounded-b-[28px]">
           {safeTab === 'dashboard' && (
             <DashboardView
               collaborators={collaborators}

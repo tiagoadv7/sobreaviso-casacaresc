@@ -239,7 +239,7 @@ export const DayModal: React.FC<DayModalProps> = ({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-black/5">
+        <div className="flex items-center justify-end flex-wrap gap-2.5 pt-4 border-t border-black/5">
           {isAdmin && daySchedule.isCustom && (
             <button
               type="button"
