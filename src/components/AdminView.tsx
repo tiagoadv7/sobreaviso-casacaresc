@@ -103,11 +103,30 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   const [isLinkingCollabs, setIsLinkingCollabs] = useState(false);
   const [linkCollabsStatus, setLinkCollabsStatus] = useState<string | null>(null);
+  const [selectedUids, setSelectedUids] = useState<Set<string>>(new Set());
 
   const collaboratorIds = new Set(collaborators.map((c) => c.id));
-  const usersMissingCollaborator = users.filter(
-    (u) => !u.collaboratorId || !collaboratorIds.has(u.collaboratorId)
-  ).length;
+  // Só faz sentido oferecer para colaboradores — admins não costumam
+  // precisar de um registro de escala próprio, e o pedido é selecionar
+  // manualmente quem deve ganhar um colaborador vinculado.
+  const candidateUsers = users.filter(
+    (u) => u.role !== 'admin' && (!u.collaboratorId || !collaboratorIds.has(u.collaboratorId))
+  );
+
+  const toggleCandidateSelection = (uid: string) => {
+    setSelectedUids((prev) => {
+      const next = new Set(prev);
+      if (next.has(uid)) next.delete(uid);
+      else next.add(uid);
+      return next;
+    });
+  };
+
+  const toggleSelectAllCandidates = () => {
+    setSelectedUids((prev) =>
+      prev.size === candidateUsers.length ? new Set() : new Set(candidateUsers.map((u) => u.uid))
+    );
+  };
 
   const showFeedback = (uid: string, msg: string, type: 'ok' | 'err' = 'ok') => {
     setFeedback({ uid, msg, type });
@@ -130,15 +149,14 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
   };
 
   const handleLinkCollaborators = async () => {
+    const usersToLink = candidateUsers.filter((u) => selectedUids.has(u.uid));
+    if (usersToLink.length === 0) return;
     setIsLinkingCollabs(true);
     setLinkCollabsStatus(null);
     try {
-      const created = await syncCollaboratorsFromUsers(users, collaborators);
-      setLinkCollabsStatus(
-        created > 0
-          ? `✓ ${created} colaborador${created !== 1 ? 'es' : ''} criado${created !== 1 ? 's' : ''} a partir dos usuários.`
-          : 'Todos os usuários já têm um colaborador vinculado.'
-      );
+      const created = await syncCollaboratorsFromUsers(usersToLink, collaborators);
+      setLinkCollabsStatus(`✓ ${created} colaborador${created !== 1 ? 'es' : ''} criado${created !== 1 ? 's' : ''}.`);
+      setSelectedUids(new Set());
       setTimeout(() => setLinkCollabsStatus(null), 4000);
     } catch {
       setLinkCollabsStatus('Erro ao gerar colaboradores. Verifique as regras do Firestore.');
@@ -193,20 +211,51 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
         </div>
       )}
 
-      {usersMissingCollaborator > 0 && (
-        <div className="p-3.5 rounded-2xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-medium flex items-center justify-between flex-wrap gap-2">
-          <span>
-            {usersMissingCollaborator} usuário{usersMissingCollaborator !== 1 ? 's' : ''} sem colaborador vinculado —
-            {usersMissingCollaborator !== 1 ? ' eles não aparecem' : ' ele não aparece'} na aba Colaboradores.
-          </span>
+      {candidateUsers.length > 0 && (
+        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="text-xs font-semibold text-amber-800">
+              {candidateUsers.length} colaborador{candidateUsers.length !== 1 ? 'es' : ''} sem cadastro vinculado — selecione quem deve aparecer na aba Colaboradores.
+            </p>
+            <button
+              type="button"
+              onClick={toggleSelectAllCandidates}
+              className="text-[11px] font-semibold text-amber-700 hover:text-amber-900 underline underline-offset-2 cursor-pointer"
+            >
+              {selectedUids.size === candidateUsers.length ? 'Desmarcar todos' : 'Marcar todos'}
+            </button>
+          </div>
+
+          <div className="space-y-1.5">
+            {candidateUsers.map((u) => (
+              <label
+                key={u.uid}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/70 border border-amber-100 text-xs cursor-pointer hover:bg-white transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedUids.has(u.uid)}
+                  onChange={() => toggleCandidateSelection(u.uid)}
+                  className="w-3.5 h-3.5 rounded accent-amber-600 cursor-pointer"
+                />
+                <span className="font-semibold text-neutral-800">{u.displayName}</span>
+                <span className="text-neutral-400 truncate">{u.email}</span>
+              </label>
+            ))}
+          </div>
+
           <button
             type="button"
             onClick={handleLinkCollaborators}
-            disabled={isLinkingCollabs}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition-all cursor-pointer disabled:opacity-60 shrink-0"
+            disabled={isLinkingCollabs || selectedUids.size === 0}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition-all cursor-pointer disabled:opacity-60"
           >
             <Users className="w-3.5 h-3.5" />
-            <span>{isLinkingCollabs ? 'Gerando…' : 'Gerar colaboradores agora'}</span>
+            <span>
+              {isLinkingCollabs
+                ? 'Gerando…'
+                : `Gerar ${selectedUids.size > 0 ? selectedUids.size + ' ' : ''}colaborador${selectedUids.size !== 1 ? 'es' : ''} selecionado${selectedUids.size !== 1 ? 's' : ''}`}
+            </span>
           </button>
         </div>
       )}
