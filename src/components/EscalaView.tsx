@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Collaborator, DaySchedule, CallRecord } from '../types';
 import { MONTH_NAMES } from '../utils/constants';
 import { fmtHours } from '../utils/calc';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarRange, Clock } from 'lucide-react';
 import { CustomSelect, SelectOption } from './CustomSelect';
+import { MonthYearPickerModal } from './modals/MonthYearPickerModal';
 
 interface EscalaViewProps {
   collaborators: Collaborator[];
@@ -36,6 +37,7 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
   onOpenDayModal,
   onOpenWeekScheduleModal,
 }) => {
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const activeCollabs = collaborators.filter((c) => c.status === 'ativo');
 
   // Compute leading blanks for Monday-first calendar
@@ -126,16 +128,25 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          <button
-            type="button"
-            onClick={onGoToToday}
-            className="flex flex-col items-center gap-0.5 cursor-pointer"
-          >
-            <span className="text-sm font-bold text-neutral-800">
-              {MONTH_NAMES[currentMonth]} {currentYear}
-            </span>
-            <span className="text-[11px] font-semibold text-[#319685]">Hoje</span>
-          </button>
+          <div className="flex flex-col items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setIsPickerOpen(true)}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#f4f4f1] border border-black/10 hover:bg-[#ececeb] transition-colors cursor-pointer"
+            >
+              <CalendarIcon className="w-3.5 h-3.5 text-[#319685]" />
+              <span className="text-sm font-bold text-neutral-800 capitalize">
+                {MONTH_NAMES[currentMonth]} {currentYear}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={onGoToToday}
+              className="text-[11px] font-semibold text-[#319685] hover:text-[#084F42] cursor-pointer"
+            >
+              Hoje
+            </button>
+          </div>
 
           <button
             type="button"
@@ -382,6 +393,17 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
           </tbody>
         </table>
       </div>
+
+      <MonthYearPickerModal
+        isOpen={isPickerOpen}
+        currentYear={currentYear}
+        currentMonth={currentMonth}
+        onClose={() => setIsPickerOpen(false)}
+        onConfirm={(year, month) => {
+          onSelectYear(year);
+          onSelectMonth(month);
+        }}
+      />
     </div>
   );
 };

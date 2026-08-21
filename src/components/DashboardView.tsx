@@ -690,7 +690,10 @@ const SvgCollabCallsChart: React.FC<{
   const W = 320;
   const H = 200;
   const padL = 30;
-  const padB = 30;
+  // Sem rótulo de nome sob a barra — com vários colaboradores o texto
+  // colide (nomes longos, pouco espaço); os nomes já aparecem coloridos
+  // na legenda abaixo do gráfico.
+  const padB = 10;
   const padT = 15;
   const padR = 10;
   const innerW = W - padL - padR;
@@ -738,16 +741,6 @@ const SvgCollabCallsChart: React.FC<{
             >
               <title>{`${c.name}: ${v} chamados`}</title>
             </rect>
-            <text
-              x={x + barW / 2}
-              y={padT + innerH + 16}
-              fontSize="10"
-              fontWeight="500"
-              fill="#52514e"
-              textAnchor="middle"
-            >
-              {c.name}
-            </text>
           </g>
         );
       })}
