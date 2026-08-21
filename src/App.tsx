@@ -88,11 +88,15 @@ function LoadingScreen({ displayName }: { displayName?: string } = {}) {
             />
           ))}
         </svg>
-        <img
-          src="/logo-icon.svg"
-          alt="Casacaresc"
-          className="w-28 h-28 object-contain sobreaviso-loading-icon"
-        />
+        {/* Disco branco atrás do ícone — o verso-marca (mãos coral/verde-água)
+            perde contraste sobre o fundo verde-escuro sem uma base clara. */}
+        <div className="w-[120px] h-[120px] rounded-full bg-white shadow-lg flex items-center justify-center sobreaviso-loading-icon">
+          <img
+            src="/logo-icon.svg"
+            alt="Casacaresc"
+            className="w-24 h-24 object-contain"
+          />
+        </div>
       </div>
 
       <div className="flex flex-col items-center gap-1 text-center">
