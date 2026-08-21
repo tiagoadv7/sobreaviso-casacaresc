@@ -88,13 +88,15 @@ function LoadingScreen({ displayName }: { displayName?: string } = {}) {
             />
           ))}
         </svg>
-        {/* Disco branco atrás do ícone — o verso-marca (mãos coral/verde-água)
-            perde contraste sobre o fundo verde-escuro sem uma base clara. */}
-        <div className="w-[120px] h-[120px] rounded-full bg-white shadow-lg flex items-center justify-center sobreaviso-loading-icon">
+        {/* Disco branco atrás do selo — a marca (mãos coral/verde-água)
+            perde contraste sobre o fundo verde-escuro sem uma base clara.
+            Usa o favicon (selo com o nome "CASACARESC" dentro), não só o
+            ícone das mãos sem nenhum texto. */}
+        <div className="w-[128px] h-[128px] rounded-full bg-white shadow-lg flex items-center justify-center sobreaviso-loading-icon">
           <img
-            src="/logo-icon.svg"
+            src="/favicon.svg"
             alt="Casacaresc"
-            className="w-24 h-24 object-contain"
+            className="w-28 h-28 object-contain"
           />
         </div>
       </div>
