@@ -57,6 +57,7 @@ interface AuthContextValue {
   updateUserRole: (uid: string, role: UserRole) => Promise<void>;
   updateUserCollaboratorLink: (uid: string, collaboratorId: string | null) => Promise<void>;
   updateUserDisplayName: (uid: string, displayName: string) => Promise<void>;
+  setUserMustChangePassword: (uid: string, value: boolean) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   disableUser: (uid: string) => Promise<void>;
   enableUser: (uid: string) => Promise<void>;
@@ -205,6 +206,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSession((prev) => prev?.uid === uid ? { ...prev, displayName } : prev);
   }, []);
 
+  const setUserMustChangePassword = useCallback(async (uid: string, value: boolean) => {
+    await updateUserProfile(uid, { mustChangePassword: value });
+    setSession((prev) => prev?.uid === uid ? { ...prev, mustChangePassword: value } : prev);
+  }, []);
+
   const sendPasswordReset = useCallback(async (email: string) => {
     await adminSendPasswordReset(email);
   }, []);
@@ -234,6 +240,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateUserRole,
         updateUserCollaboratorLink,
         updateUserDisplayName,
+        setUserMustChangePassword,
         sendPasswordReset,
         disableUser,
         enableUser,

@@ -95,7 +95,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
 /* ─── Painel de Usuários Firebase ─── */
 const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators }) => {
   const { users, session, createUser, updateUserRole, updateUserCollaboratorLink,
-    updateUserDisplayName, sendPasswordReset, disableUser, enableUser } = useAuth();
+    updateUserDisplayName, setUserMustChangePassword, sendPasswordReset, disableUser, enableUser } = useAuth();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingUser, setEditingUser] = useState<SystemUser | null>(null);
@@ -400,6 +400,8 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
           onClose={() => setEditingUser(null)}
           onUpdateName={updateUserDisplayName}
           onUpdateCollab={updateUserCollaboratorLink}
+          onSetMustChangePassword={setUserMustChangePassword}
+          onSendReset={sendPasswordReset}
         />
       )}
     </div>
@@ -643,11 +645,16 @@ const EditUserModal: React.FC<{
   onClose: () => void;
   onUpdateName: (uid: string, name: string) => Promise<void>;
   onUpdateCollab: (uid: string, collabId: string | null) => Promise<void>;
-}> = ({ user, collaborators, onClose, onUpdateName, onUpdateCollab }) => {
+  onSetMustChangePassword: (uid: string, value: boolean) => Promise<void>;
+  onSendReset: (email: string) => Promise<void>;
+}> = ({ user, collaborators, onClose, onUpdateName, onUpdateCollab, onSetMustChangePassword, onSendReset }) => {
   const [displayName, setDisplayName] = useState(user.displayName);
   const [collaboratorId, setCollaboratorId] = useState(user.collaboratorId ?? '');
+  const [mustChangePassword, setMustChangePassword] = useState(user.mustChangePassword ?? false);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [resetStatus, setResetStatus] = useState('');
+  const [sendingReset, setSendingReset] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -655,15 +662,31 @@ const EditUserModal: React.FC<{
     await Promise.all([
       displayName !== user.displayName ? onUpdateName(user.uid, displayName) : Promise.resolve(),
       collaboratorId !== (user.collaboratorId ?? '') ? onUpdateCollab(user.uid, collaboratorId || null) : Promise.resolve(),
+      mustChangePassword !== (user.mustChangePassword ?? false)
+        ? onSetMustChangePassword(user.uid, mustChangePassword)
+        : Promise.resolve(),
     ]);
     setLoading(false);
     setSaved(true);
     setTimeout(onClose, 800);
   };
 
+  const handleSendReset = async () => {
+    setSendingReset(true);
+    setResetStatus('');
+    try {
+      await onSendReset(user.email);
+      setResetStatus('✓ Link enviado para ' + user.email);
+    } catch {
+      setResetStatus('Erro ao enviar o link. Tente novamente.');
+    } finally {
+      setSendingReset(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl w-full max-w-sm p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl w-full max-w-sm p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between">
           <div>
             <h3 className="text-base font-bold text-neutral-900">Editar usuário</h3>
@@ -698,6 +721,34 @@ const EditUserModal: React.FC<{
               onChange={setCollaboratorId}
               placeholder="— Nenhum —"
             />
+          </div>
+
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={mustChangePassword}
+              onChange={(e) => setMustChangePassword(e.target.checked)}
+              className="w-3.5 h-3.5 rounded accent-[#319685] cursor-pointer"
+            />
+            <span className="text-[11px] text-neutral-600 font-medium">
+              Pedir para criar uma nova senha no próximo acesso
+            </span>
+          </label>
+
+          <div className="space-y-2 pt-3.5 border-t border-black/5">
+            <p className="text-xs font-semibold text-neutral-700">Senha</p>
+            <button
+              type="button"
+              onClick={handleSendReset}
+              disabled={sendingReset}
+              className="w-full flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-2xl border border-[#319685]/30 bg-[#DEEDE0]/40 text-[#084F42] text-xs font-semibold hover:bg-[#DEEDE0] transition-all cursor-pointer disabled:opacity-60"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-[#319685]" />
+              {sendingReset ? 'Enviando…' : 'Enviar link de redefinição de senha'}
+            </button>
+            {resetStatus && (
+              <p className="text-[11px] text-neutral-500 text-center">{resetStatus}</p>
+            )}
           </div>
 
           <div className="flex gap-2.5 pt-4 border-t border-black/5">
