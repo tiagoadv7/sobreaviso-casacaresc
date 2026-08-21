@@ -410,13 +410,14 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
 const CreateUserModal: React.FC<{
   collaborators: Collaborator[];
   onClose: () => void;
-  onCreate: (email: string, password: string, data: { displayName: string; role: UserRole; collaboratorId?: string }) => Promise<string>;
+  onCreate: (email: string, password: string, data: { displayName: string; role: UserRole; collaboratorId?: string; mustChangePassword?: boolean }) => Promise<string>;
   onLinkCollaborator: (uid: string, collaboratorId: string | null) => Promise<void>;
   onSendReset: (email: string) => Promise<void>;
 }> = ({ collaborators, onClose, onCreate, onLinkCollaborator, onSendReset }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const [mustChangePassword, setMustChangePassword] = useState(true);
   const [displayName, setDisplayName] = useState('');
   const [matricula, setMatricula] = useState('');
   const [role, setRole] = useState<UserRole>('colaborador');
@@ -442,6 +443,7 @@ const CreateUserModal: React.FC<{
         displayName: displayName.trim(),
         role,
         collaboratorId: collaboratorId || undefined,
+        mustChangePassword,
       });
 
       // Se nenhum colaborador existente foi selecionado, cria um novo
@@ -556,6 +558,17 @@ const CreateUserModal: React.FC<{
                 {showPw ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               </button>
             </div>
+            <label className="flex items-center gap-2 pt-0.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={mustChangePassword}
+                onChange={(e) => setMustChangePassword(e.target.checked)}
+                className="w-3.5 h-3.5 rounded accent-[#319685] cursor-pointer"
+              />
+              <span className="text-[11px] text-neutral-600 font-medium">
+                Pedir para criar uma nova senha no primeiro acesso
+              </span>
+            </label>
           </div>
 
           {/* Função / Role */}

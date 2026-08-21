@@ -24,7 +24,12 @@ import { SystemUser, UserRole } from '../types';
 export async function adminCreateUser(
   email: string,
   password: string,
-  profile: { displayName: string; role: UserRole; collaboratorId?: string }
+  profile: {
+    displayName: string;
+    role: UserRole;
+    collaboratorId?: string;
+    mustChangePassword?: boolean;
+  }
 ): Promise<string> {
   // Instância secundária com nome único para não conflitar
   const secondaryAppName = `admin-create-${Date.now()}`;
@@ -36,7 +41,8 @@ export async function adminCreateUser(
     const uid = cred.user.uid;
 
     // Salva perfil no Firestore — mustChangePassword força a pessoa a trocar
-    // a senha temporária definida pelo admin no primeiro acesso dela.
+    // a senha temporária definida pelo admin no primeiro acesso dela. O
+    // admin decide isso na tela de criação (marcado por padrão).
     const userProfile: SystemUser = {
       uid,
       email,
@@ -45,7 +51,7 @@ export async function adminCreateUser(
       collaboratorId: profile.collaboratorId,
       disabled: false,
       createdAt: new Date().toISOString(),
-      mustChangePassword: true,
+      mustChangePassword: profile.mustChangePassword ?? true,
     };
     await saveUserProfile(uid, userProfile);
 

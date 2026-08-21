@@ -52,7 +52,7 @@ interface AuthContextValue {
   createUser: (
     email: string,
     password: string,
-    data: { displayName: string; role: UserRole; collaboratorId?: string }
+    data: { displayName: string; role: UserRole; collaboratorId?: string; mustChangePassword?: boolean }
   ) => Promise<string>;
   updateUserRole: (uid: string, role: UserRole) => Promise<void>;
   updateUserCollaboratorLink: (uid: string, collaboratorId: string | null) => Promise<void>;
@@ -176,7 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const createUser = useCallback(async (
     email: string,
     password: string,
-    data: { displayName: string; role: UserRole; collaboratorId?: string }
+    data: { displayName: string; role: UserRole; collaboratorId?: string; mustChangePassword?: boolean }
   ) => {
     return adminCreateUser(email, password, data);
   }, []);
