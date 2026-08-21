@@ -1,6 +1,6 @@
 import React from 'react';
 import { Collaborator, DaySchedule } from '../types';
-import { fmtHours, getInitials } from '../utils/calc';
+import { collaboratorStatusLabel, fmtHours, getInitials } from '../utils/calc';
 import { Phone, Pencil, Trash2, UserPlus, AlertCircle } from 'lucide-react';
 
 interface ColaboradoresViewProps {
@@ -89,7 +89,7 @@ export const ColaboradoresView: React.FC<ColaboradoresViewProps> = ({
                             : 'bg-neutral-100 text-neutral-500'
                         }`}
                       >
-                        {c.status === 'ativo' ? 'Ativo' : 'Licença'}
+                        {collaboratorStatusLabel(c)}
                       </span>
                     </div>
 

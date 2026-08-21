@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Collaborator, DaySchedule, CallRecord } from '../types';
 import { MONTH_NAMES } from '../utils/constants';
-import { fmtHours } from '../utils/calc';
+import { collaboratorStatusLabel, fmtHours } from '../utils/calc';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarRange, Clock } from 'lucide-react';
-import { CustomSelect, SelectOption } from './CustomSelect';
 import { MonthYearPickerModal } from './modals/MonthYearPickerModal';
 
 interface EscalaViewProps {
@@ -98,122 +97,51 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
     };
   });
 
-  // Month & Year Select options
-  const monthOptions: SelectOption[] = MONTH_NAMES.map((name, i) => ({
-    value: String(i),
-    label: name,
-    icon: <CalendarIcon className="w-3.5 h-3.5 text-neutral-400" />,
-  }));
-
-  const yearOptions: SelectOption[] = Array.from({ length: 11 }, (_, i) => {
-    const y = currentYear - 5 + i;
-    return {
-      value: String(y),
-      label: String(y),
-    };
-  });
-
   return (
     <div className="space-y-6">
       {/* Month Navigator Toolbar + Legend */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs space-y-4 hover:border-black/20 transition-all">
-        {/* Mobile: só mês/ano + navegação esquerda/direita */}
-        <div className="flex lg:hidden items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={onPrevMonth}
-            className="p-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer shadow-2xs shrink-0"
-            title="Mês anterior"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-
-          <div className="flex flex-col items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setIsPickerOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#f4f4f1] border border-black/10 hover:bg-[#ececeb] transition-colors cursor-pointer"
-            >
-              <CalendarIcon className="w-3.5 h-3.5 text-[#319685]" />
-              <span className="text-sm font-bold text-neutral-800 capitalize">
-                {MONTH_NAMES[currentMonth]} {currentYear}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={onGoToToday}
-              className="text-[11px] font-semibold text-[#319685] hover:text-[#084F42] cursor-pointer"
-            >
-              Hoje
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={onNextMonth}
-            className="p-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer shadow-2xs shrink-0"
-            title="Próximo mês"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        {isAdmin && (
-          <button
-            type="button"
-            onClick={onOpenWeekScheduleModal}
-            className="flex lg:hidden w-full items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 transition-all cursor-pointer"
-          >
-            <CalendarRange className="w-4 h-4" />
-            Adicionar escala da semana
-          </button>
-        )}
-
-        {/* Desktop: navegação completa com selects de mês/ano */}
-        <div className="hidden lg:flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2.5 flex-wrap">
+        {/* Navegação de mês — mesmo comportamento em mobile e desktop: o
+            "pill" com mês/ano abre o seletor completo (MonthYearPickerModal)
+            em vez de dropdowns separados de mês e ano. */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onPrevMonth}
-              className="p-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer shadow-2xs"
+              className="p-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer shadow-2xs shrink-0"
               title="Mês anterior"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
-            {/* Select Mês */}
-            <div className="min-w-[150px]">
-              <CustomSelect
-                options={monthOptions}
-                value={String(currentMonth)}
-                onChange={(val) => onSelectMonth(parseInt(val, 10))}
-              />
-            </div>
-
-            {/* Select Ano */}
-            <div className="min-w-[110px]">
-              <CustomSelect
-                options={yearOptions}
-                value={String(currentYear)}
-                onChange={(val) => onSelectYear(parseInt(val, 10))}
-              />
+            <div className="flex flex-col items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setIsPickerOpen(true)}
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#f4f4f1] border border-black/10 hover:bg-[#ececeb] transition-colors cursor-pointer"
+              >
+                <CalendarIcon className="w-3.5 h-3.5 text-[#319685]" />
+                <span className="text-sm font-bold text-neutral-800 capitalize">
+                  {MONTH_NAMES[currentMonth]} {currentYear}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={onGoToToday}
+                className="text-[11px] font-semibold text-[#319685] hover:text-[#084F42] cursor-pointer"
+              >
+                Hoje
+              </button>
             </div>
 
             <button
               type="button"
               onClick={onNextMonth}
-              className="p-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer shadow-2xs"
+              className="p-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer shadow-2xs shrink-0"
               title="Próximo mês"
             >
               <ChevronRight className="w-4 h-4" />
-            </button>
-
-            <button
-              type="button"
-              onClick={onGoToToday}
-              className="px-4 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-xs font-semibold text-neutral-800 transition-colors cursor-pointer shadow-2xs"
-            >
-              Hoje
             </button>
           </div>
 
@@ -221,13 +149,13 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
             <button
               type="button"
               onClick={onOpenWeekScheduleModal}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 transition-all cursor-pointer"
+              className="w-full lg:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 transition-all cursor-pointer"
             >
               <CalendarRange className="w-4 h-4" />
               Adicionar escala da semana
             </button>
           ) : (
-            <div className="text-xs text-neutral-400 font-medium">
+            <div className="hidden lg:block text-xs text-neutral-400 font-medium">
               Clique em qualquer dia do calendário para editar o plantão e os chamados
             </div>
           )}
@@ -243,8 +171,10 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
             >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
               {c.name}
-              {c.status === 'licenca' && (
-                <span className="text-[10px] opacity-70 font-normal">(licença)</span>
+              {c.status !== 'ativo' && (
+                <span className="text-[10px] opacity-70 font-normal">
+                  ({collaboratorStatusLabel(c).toLowerCase()})
+                </span>
               )}
             </span>
           ))}

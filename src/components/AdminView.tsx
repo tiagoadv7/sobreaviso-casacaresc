@@ -23,6 +23,7 @@ import { Collaborator, SystemUser, UserRole } from '../types';
 import { useAuth } from '../auth/AuthContext';
 import { forceSyncInitialData, clearAllCollaborators, saveCollaborator, syncCollaboratorsFromUsers } from '../firebase/db';
 import { PALETTE } from '../utils/constants';
+import { collaboratorStatusLabel } from '../utils/calc';
 import { CustomSelect, SelectOption } from './CustomSelect';
 import { ConfirmModal } from './modals/ConfirmModal';
 
@@ -453,6 +454,7 @@ const CreateUserModal: React.FC<{
           contact: '',
           color: PALETTE[collaborators.length % PALETTE.length],
           status: 'ativo',
+          customStatusLabel: '',
           note: '',
         });
         await onLinkCollaborator(uid, newCollaboratorId);
@@ -774,7 +776,7 @@ const ColaboradoresAdminPanel: React.FC<{
               <p className="text-[11px] text-neutral-400 truncate">
                 {c.role} · Mat. {c.matricula} ·{' '}
                 <span className={c.status === 'ativo' ? 'text-emerald-600' : 'text-[#E84A4E]'}>
-                  {c.status === 'ativo' ? 'Ativo' : 'Em licença'}
+                  {collaboratorStatusLabel(c)}
                 </span>
               </p>
             </div>

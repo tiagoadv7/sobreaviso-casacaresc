@@ -19,6 +19,22 @@ export function pad(n: number): string {
   return n.toString().padStart(2, '0');
 }
 
+// Rótulo exibido para o status do colaborador — centralizado aqui porque
+// vários lugares (lista de colaboradores, seletores de escala, legendas)
+// precisam do mesmo texto, inclusive o rótulo livre do status "Personalizado".
+export function collaboratorStatusLabel(c: Pick<Collaborator, 'status' | 'customStatusLabel'>): string {
+  switch (c.status) {
+    case 'licenca':
+      return 'Em licença';
+    case 'ferias':
+      return 'Férias';
+    case 'personalizado':
+      return c.customStatusLabel.trim() || 'Personalizado';
+    default:
+      return 'Ativo';
+  }
+}
+
 export function monthLabel(month: number, year: number): string {
   return `${MONTH_NAMES[month]}/${year}`;
 }

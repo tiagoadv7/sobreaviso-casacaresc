@@ -1,6 +1,6 @@
 export type ShiftKind = 'semana' | 'fim_de_semana' | 'apoio';
 export type CallStatus = 'pendente' | 'concluido';
-export type CollaboratorStatus = 'ativo' | 'licenca';
+export type CollaboratorStatus = 'ativo' | 'licenca' | 'ferias' | 'personalizado';
 
 export interface Collaborator {
   id: string;
@@ -10,6 +10,7 @@ export interface Collaborator {
   contact: string;
   color: string;
   status: CollaboratorStatus;
+  customStatusLabel: string; // usado apenas quando status === 'personalizado'
   note: string;
 }
 

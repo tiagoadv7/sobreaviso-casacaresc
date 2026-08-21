@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Collaborator, DaySchedule } from '../../types';
-import { defaultShiftHoursForKind, computeDurationHours, pad } from '../../utils/calc';
+import { collaboratorStatusLabel, defaultShiftHoursForKind, computeDurationHours, pad } from '../../utils/calc';
 import { MONTH_NAMES } from '../../utils/constants';
 import { X, CalendarRange, User, Wand2 } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../CustomSelect';
@@ -60,7 +60,7 @@ export const WeekScheduleModal: React.FC<WeekScheduleModalProps> = ({
       value: c.id,
       label: c.name,
       color: c.color,
-      badge: c.status === 'licenca' ? 'Em licença' : undefined,
+      badge: c.status !== 'ativo' ? collaboratorStatusLabel(c) : undefined,
       icon: <User className="w-3.5 h-3.5 text-neutral-400" />,
     })),
   ];

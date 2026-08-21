@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Collaborator, DemandType, CallRecord, CallStatus, DaySchedule } from '../../types';
 import { PALETTE, EXTRA_COLORS, WEEKDAY_LABELS } from '../../utils/constants';
-import { pad } from '../../utils/calc';
+import { collaboratorStatusLabel, pad } from '../../utils/calc';
 import { X, ChevronDown, Tag, Calendar, User, CheckCircle2, AlertCircle } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../CustomSelect';
 import { TimeSelect } from '../TimeSelect';
@@ -142,7 +142,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
     value: c.id,
     label: c.name,
     color: c.color,
-    badge: c.status === 'licenca' ? 'Em licença' : undefined,
+    badge: c.status !== 'ativo' ? collaboratorStatusLabel(c) : undefined,
     icon: <User className="w-3.5 h-3.5 text-neutral-400" />,
   }));
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Collaborator, DaySchedule, CallRecord, DemandType } from '../../types';
 import { MONTH_NAMES } from '../../utils/constants';
 import {
+  collaboratorStatusLabel,
   computeDurationHours,
   computeDurationText,
   defaultShiftHoursForKind,
@@ -78,7 +79,7 @@ export const DayModal: React.FC<DayModalProps> = ({
     value: c.id,
     label: c.name,
     color: c.color,
-    badge: c.status === 'licenca' ? 'Em licença' : undefined,
+    badge: c.status !== 'ativo' ? collaboratorStatusLabel(c) : undefined,
     icon: <User className="w-3.5 h-3.5 text-neutral-400" />,
   }));
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Collaborator, CollaboratorStatus } from '../../types';
 import { PALETTE } from '../../utils/constants';
-import { X, CheckCircle2, UserX, Mail } from 'lucide-react';
+import { X, CheckCircle2, UserX, TreePalm, Pencil, Mail } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../CustomSelect';
 
 interface CollaboratorModalProps {
@@ -27,6 +27,7 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
   const [matricula, setMatricula] = useState<string>('');
   const [contact, setContact] = useState<string>('');
   const [status, setStatus] = useState<CollaboratorStatus>('ativo');
+  const [customStatusLabel, setCustomStatusLabel] = useState<string>('');
   const [color, setColor] = useState<string>(PALETTE[0]);
   const [note, setNote] = useState<string>('');
   const [errorText, setErrorText] = useState<string>('');
@@ -38,6 +39,7 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
       setMatricula(editingCollab.matricula || '');
       setContact(editingCollab.contact || '');
       setStatus(editingCollab.status);
+      setCustomStatusLabel(editingCollab.customStatusLabel || '');
       setColor(editingCollab.color);
       setNote(editingCollab.note || '');
     } else {
@@ -46,6 +48,7 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
       setMatricula('');
       setContact('');
       setStatus('ativo');
+      setCustomStatusLabel('');
       setColor(PALETTE[0]);
       setNote('');
     }
@@ -67,12 +70,28 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
       color: '#dc2626',
       icon: <UserX className="w-3.5 h-3.5 text-red-500" />,
     },
+    {
+      value: 'ferias',
+      label: 'Férias (não entra na escala)',
+      color: '#0284c7',
+      icon: <TreePalm className="w-3.5 h-3.5 text-sky-500" />,
+    },
+    {
+      value: 'personalizado',
+      label: 'Personalizado (não entra na escala)',
+      color: '#7c3aed',
+      icon: <Pencil className="w-3.5 h-3.5 text-violet-500" />,
+    },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setErrorText('Por favor, informe o nome do colaborador.');
+      return;
+    }
+    if (status === 'personalizado' && !customStatusLabel.trim()) {
+      setErrorText('Informe o nome do status personalizado.');
       return;
     }
 
@@ -83,6 +102,7 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
         matricula: matricula.trim(),
         contact: contact.trim(),
         status,
+        customStatusLabel: status === 'personalizado' ? customStatusLabel.trim() : '',
         color,
         note: note.trim(),
       },
@@ -198,6 +218,22 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
               placeholder="Selecione o status"
             />
           </div>
+
+          {/* Nome do status personalizado — só aparece quando selecionado acima */}
+          {status === 'personalizado' && (
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-neutral-700">
+                Nome do status *
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: Atestado médico"
+                value={customStatusLabel}
+                onChange={(e) => setCustomStatusLabel(e.target.value)}
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+              />
+            </div>
+          )}
 
           {/* Cor (Swatches) */}
           <div className="space-y-1.5">

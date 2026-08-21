@@ -112,6 +112,7 @@ export async function syncCollaboratorsFromUsers(
       contact: '',
       color: PALETTE[(collaborators.length + created) % PALETTE.length],
       status: 'ativo',
+      customStatusLabel: '',
       note: '',
     };
     batch.set(doc(db, 'collaborators', id), newCollaborator);
