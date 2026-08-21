@@ -105,43 +105,46 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
             "pill" com mês/ano abre o seletor completo (MonthYearPickerModal)
             em vez de dropdowns separados de mês e ano. */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onPrevMonth}
-              className="p-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer shadow-2xs shrink-0"
-              title="Mês anterior"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+          <div className="flex flex-col items-center gap-1.5">
+            {/* Uma única cápsula arredondada — setas e mês/ano no mesmo
+                bloco, sem espaço entre eles. */}
+            <div className="flex items-center rounded-full border border-black/10 bg-[#fcfcfb] shadow-2xs overflow-hidden">
+              <button
+                type="button"
+                onClick={onPrevMonth}
+                className="p-2.5 hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer"
+                title="Mês anterior"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
 
-            <div className="flex flex-col items-center gap-1">
               <button
                 type="button"
                 onClick={() => setIsPickerOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#f4f4f1] border border-black/10 hover:bg-[#ececeb] transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-[#f4f4f1] transition-colors cursor-pointer"
               >
                 <CalendarIcon className="w-3.5 h-3.5 text-[#319685]" />
                 <span className="text-sm font-bold text-neutral-800 capitalize">
                   {MONTH_NAMES[currentMonth]} {currentYear}
                 </span>
               </button>
+
               <button
                 type="button"
-                onClick={onGoToToday}
-                className="text-[11px] font-semibold text-[#319685] hover:text-[#084F42] cursor-pointer"
+                onClick={onNextMonth}
+                className="p-2.5 hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer"
+                title="Próximo mês"
               >
-                Hoje
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
 
             <button
               type="button"
-              onClick={onNextMonth}
-              className="p-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] hover:bg-[#f4f4f1] text-neutral-700 transition-colors cursor-pointer shadow-2xs shrink-0"
-              title="Próximo mês"
+              onClick={onGoToToday}
+              className="text-[11px] font-semibold text-[#319685] hover:text-[#084F42] cursor-pointer"
             >
-              <ChevronRight className="w-4 h-4" />
+              Hoje
             </button>
           </div>
 

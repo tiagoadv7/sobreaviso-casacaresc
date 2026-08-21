@@ -57,17 +57,51 @@ import { ProfileModal } from './components/modals/ProfileModal';
 import { ConfirmModal } from './components/modals/ConfirmModal';
 
 /* ─── Loading screen ─── */
+// Anel de 4 cores girando ao redor do ícone circular do sistema, com o
+// ícone entrando em "bounce" — mesmo espírito da splash screen do
+// FinançasApp, com as cores e o ícone do Casacaresc.
+const RING_RADIUS = 70;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+const RING_QUARTER = RING_CIRCUMFERENCE / 4;
+const RING_COLORS = ['#319685', '#084F42', '#6BC0B2', '#E84A4E'];
+
 function LoadingScreen({ displayName }: { displayName?: string } = {}) {
   return (
     <div
-      className="min-h-dvh w-full flex flex-col items-center justify-center gap-4"
+      className="min-h-dvh w-full flex flex-col items-center justify-center gap-6"
       style={{ background: 'linear-gradient(135deg, #084F42 0%, #1e1e1c 50%, #084F42 100%)' }}
     >
-      <div className="w-12 h-12 border-4 border-white/20 border-t-[#6BC0B2] rounded-full animate-spin" />
-      {displayName && (
-        <p className="text-white text-base font-bold -mb-1">Bem-vindo(a), {displayName}!</p>
-      )}
-      <p className="text-white/70 text-sm font-medium">Carregando…</p>
+      <div className="relative w-[150px] h-[150px] flex items-center justify-center shrink-0">
+        <svg viewBox="0 0 150 150" className="absolute inset-0 w-full h-full sobreaviso-loading-ring">
+          {RING_COLORS.map((color, i) => (
+            <circle
+              key={color}
+              cx="75"
+              cy="75"
+              r={RING_RADIUS}
+              fill="none"
+              stroke={color}
+              strokeWidth="4"
+              strokeDasharray={`${RING_QUARTER} ${RING_CIRCUMFERENCE - RING_QUARTER}`}
+              strokeDashoffset={-i * RING_QUARTER}
+              transform="rotate(-90 75 75)"
+            />
+          ))}
+        </svg>
+        <img
+          src="/logo-icon.svg"
+          alt="Casacaresc"
+          className="w-28 h-28 object-contain sobreaviso-loading-icon"
+        />
+      </div>
+
+      <div className="flex flex-col items-center gap-1 text-center">
+        <p className="text-white text-lg font-bold tracking-tight">Sobreaviso</p>
+        {displayName && (
+          <p className="text-white text-sm font-bold">Bem-vindo(a), {displayName}!</p>
+        )}
+        <p className="text-white/70 text-xs font-medium">Carregando…</p>
+      </div>
     </div>
   );
 }
