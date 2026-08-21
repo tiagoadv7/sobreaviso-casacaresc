@@ -464,15 +464,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <SvgStackedWeeksChart weeks={weeksSummary} activeCollabs={activeCollabs} />
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 mt-4 pt-3.5 border-t border-black/5">
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-4 pt-3.5 border-t border-black/5">
               {activeCollabs.map((c) => (
                 <span
                   key={c.id}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
-                  style={{ backgroundColor: `${c.color}15`, color: c.color }}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-neutral-100/80"
+                  style={{ color: c.color }}
                 >
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
-                  {c.name}
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
+                  {c.name}: {fmtHours(totalsByCollab[c.id] || 0)}h
                 </span>
               ))}
             </div>
