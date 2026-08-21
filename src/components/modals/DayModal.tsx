@@ -10,6 +10,7 @@ import {
 } from '../../utils/calc';
 import { X, Plus, Trash2, User, ShieldCheck } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../CustomSelect';
+import { TimeSelect } from '../TimeSelect';
 import { useAuth } from '../../auth/AuthContext';
 
 interface DayModalProps {
@@ -146,30 +147,14 @@ export const DayModal: React.FC<DayModalProps> = ({
               <label className="block text-xs font-semibold text-neutral-700">
                 Hora inicial
               </label>
-              <input
-                type="time"
-                value={start}
-                disabled={!isAdmin}
-                onChange={(e) => setStart(e.target.value)}
-                className={`w-full px-3.5 py-2 rounded-2xl border border-black/10 text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs ${
-                  isAdmin ? 'bg-[#fcfcfb]' : 'bg-neutral-100/70 opacity-80 cursor-not-allowed'
-                }`}
-              />
+              <TimeSelect value={start} disabled={!isAdmin} onChange={setStart} />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-neutral-700">
                 Hora final
               </label>
-              <input
-                type="time"
-                value={end}
-                disabled={!isAdmin}
-                onChange={(e) => setEnd(e.target.value)}
-                className={`w-full px-3.5 py-2 rounded-2xl border border-black/10 text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs ${
-                  isAdmin ? 'bg-[#fcfcfb]' : 'bg-neutral-100/70 opacity-80 cursor-not-allowed'
-                }`}
-              />
+              <TimeSelect value={end} disabled={!isAdmin} onChange={setEnd} />
             </div>
           </div>
 

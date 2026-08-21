@@ -111,7 +111,7 @@ export const LoginScreen: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center relative overflow-hidden"
+      className="min-h-dvh w-full flex items-center justify-center relative overflow-hidden"
       style={{ background: 'linear-gradient(135deg, #084F42 0%, #1e1e1c 50%, #084F42 100%)' }}
     >
       {/* Decorative brand blobs */}

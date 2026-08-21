@@ -7,7 +7,7 @@ export const ErrorScreen: React.FC<{ error: Error }> = ({ error }) => {
 
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center p-4"
+      className="min-h-dvh w-full flex items-center justify-center p-4"
       style={{ background: 'linear-gradient(135deg, #084F42 0%, #1e1e1c 50%, #084F42 100%)' }}
     >
       <div className="w-full max-w-md bg-white rounded-[28px] shadow-2xl p-8 space-y-4">

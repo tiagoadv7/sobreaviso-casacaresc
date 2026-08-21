@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
     .toUpperCase();
 
   return (
-    <aside className="w-16 lg:w-64 shrink-0 p-2 lg:p-4 flex flex-col justify-between h-screen bg-[#edf2f7] lg:bg-transparent select-none overflow-y-auto">
+    <aside className="w-16 lg:w-64 shrink-0 p-2 lg:p-4 flex flex-col justify-between h-dvh bg-[#edf2f7] lg:bg-transparent select-none overflow-y-auto">
       <div>
         {/* Brand — só no desktop; no mobile a logo já aparece na barra superior */}
         <div className="hidden lg:flex flex-col items-center gap-2 px-2 pt-2 pb-6 text-center">

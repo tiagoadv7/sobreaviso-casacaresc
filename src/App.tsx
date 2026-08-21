@@ -60,7 +60,7 @@ import { ConfirmModal } from './components/modals/ConfirmModal';
 function LoadingScreen({ displayName }: { displayName?: string } = {}) {
   return (
     <div
-      className="min-h-screen w-full flex flex-col items-center justify-center gap-4"
+      className="min-h-dvh w-full flex flex-col items-center justify-center gap-4"
       style={{ background: 'linear-gradient(135deg, #084F42 0%, #1e1e1c 50%, #084F42 100%)' }}
     >
       <div className="w-12 h-12 border-4 border-white/20 border-t-[#6BC0B2] rounded-full animate-spin" />
@@ -388,14 +388,14 @@ function AppInner() {
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-screen w-full bg-[#edf2f7] text-[#0b0b0b] font-sans antialiased selection:bg-[#319685]/20 overflow-hidden">
+    <div className="flex h-dvh w-full bg-[#edf2f7] text-[#0b0b0b] font-sans antialiased selection:bg-[#319685]/20 overflow-hidden">
       <Sidebar
         currentTab={safeTab}
         onSelectTab={handleSelectTab}
         onOpenProfile={() => setIsProfileModalOpen(true)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 my-3 mr-3 bg-white rounded-[28px] border border-black/[0.08] shadow-sm overflow-hidden h-[calc(100vh-24px)]">
+      <div className="flex-1 flex flex-col min-w-0 my-3 mr-3 bg-white rounded-[28px] border border-black/[0.08] shadow-sm overflow-hidden h-[calc(100dvh-24px)]">
         <TopBar
           currentTab={safeTab}
           currentYear={currentYear}

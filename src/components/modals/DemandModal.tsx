@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Collaborator, DemandType, CallRecord, CallStatus, DaySchedule } from '../../types';
 import { PALETTE, EXTRA_COLORS, WEEKDAY_LABELS } from '../../utils/constants';
 import { pad } from '../../utils/calc';
-import { X, ChevronDown, Tag, Clock, Calendar, User, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, ChevronDown, Tag, Calendar, User, CheckCircle2, AlertCircle } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../CustomSelect';
+import { TimeSelect } from '../TimeSelect';
 
 interface DemandModalProps {
   isOpen: boolean;
@@ -428,28 +429,14 @@ export const DemandModal: React.FC<DemandModalProps> = ({
               <label className="block text-xs font-semibold text-neutral-700">
                 Hora inicial
               </label>
-              <div className="relative">
-                <input
-                  type="time"
-                  value={inicio}
-                  onChange={(e) => setInicio(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
-                />
-              </div>
+              <TimeSelect value={inicio} onChange={setInicio} />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-neutral-700">
                 Hora final
               </label>
-              <div className="relative">
-                <input
-                  type="time"
-                  value={fim}
-                  onChange={(e) => setFim(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
-                />
-              </div>
+              <TimeSelect value={fim} onChange={setFim} />
             </div>
           </div>
 
