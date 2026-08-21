@@ -259,10 +259,27 @@ function AppInner() {
     showToast(existingId ? 'Demanda atualizada.' : 'Demanda registrada com sucesso.');
   };
 
-  const handleDeleteCall = async (callId: string) => {
-    if (!window.confirm('Deseja excluir este registro de demanda?')) return;
-    await dbDeleteCall(callId);
-    showToast('Demanda excluída.');
+  const [callPendingDelete, setCallPendingDelete] = useState<CallRecord | null>(null);
+  const [isDeletingCall, setIsDeletingCall] = useState(false);
+
+  const handleDeleteCall = (callId: string) => {
+    const target = calls.find((c) => c.id === callId);
+    if (!target) return;
+    setCallPendingDelete(target);
+  };
+
+  const confirmDeleteCall = async () => {
+    if (!callPendingDelete) return;
+    setIsDeletingCall(true);
+    try {
+      await dbDeleteCall(callPendingDelete.id);
+      showToast('Demanda excluída.');
+      setCallPendingDelete(null);
+    } catch {
+      showToast('Erro ao excluir demanda.');
+    } finally {
+      setIsDeletingCall(false);
+    }
   };
 
   const handleAddNewDemandType = async (label: string, color: string): Promise<string> => {
@@ -582,6 +599,19 @@ function AppInner() {
         loading={isDeletingCollab}
         onConfirm={confirmDeleteCollaborator}
         onClose={() => setCollabPendingDelete(null)}
+      />
+      <ConfirmModal
+        isOpen={!!callPendingDelete}
+        title="Excluir demanda"
+        message={
+          callPendingDelete
+            ? `Deseja excluir o registro de "${demandTypes.find((d) => d.id === callPendingDelete.demandTypeId)?.label || 'demanda'}" do dia ${pad(callPendingDelete.day)}? Essa ação não pode ser desfeita.`
+            : ''
+        }
+        confirmLabel="Excluir"
+        loading={isDeletingCall}
+        onConfirm={confirmDeleteCall}
+        onClose={() => setCallPendingDelete(null)}
       />
 
       {toastMessage && (
