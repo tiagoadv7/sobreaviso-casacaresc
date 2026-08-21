@@ -267,7 +267,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 cursor-pointer transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>+ Cadastrar Demanda</span>
+            <span>Cadastrar Demanda</span>
           </button>
         </div>
 
@@ -407,6 +407,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
             <div className="h-64 w-full">
               <SvgBarChart activeCollabs={activeCollabs} totalsByCollab={totalsByCollab} />
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2.5 mt-1 border-t border-black/5">
+              {activeCollabs.map((c) => (
+                <span
+                  key={c.id}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-neutral-100/80"
+                  style={{ color: c.color }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
+                  {c.name}: {fmtHours(totalsByCollab[c.id] || 0)}h
+                </span>
+              ))}
             </div>
           </div>
 
@@ -619,7 +632,10 @@ const SvgBarChart: React.FC<{
   const W = 640;
   const H = 240;
   const padL = 40;
-  const padB = 30;
+  // Sem rótulo de nome sob a barra — mesmo problema do gráfico de
+  // atendimentos: com várias colaboradoras o texto colide. Os nomes já
+  // aparecem coloridos na legenda abaixo do gráfico.
+  const padB = 10;
   const padT = 15;
   const padR = 15;
   const innerW = W - padL - padR;
@@ -666,16 +682,6 @@ const SvgBarChart: React.FC<{
             >
               <title>{`${c.name}: ${fmtHours(v)}h`}</title>
             </rect>
-            <text
-              x={x + barW / 2}
-              y={padT + innerH + 18}
-              fontSize="12"
-              fontWeight="500"
-              fill="#52514e"
-              textAnchor="middle"
-            >
-              {c.name}
-            </text>
           </g>
         );
       })}

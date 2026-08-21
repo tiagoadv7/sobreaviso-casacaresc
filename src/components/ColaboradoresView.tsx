@@ -53,7 +53,7 @@ export const ColaboradoresView: React.FC<ColaboradoresViewProps> = ({
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-semibold bg-[#319685] text-white hover:bg-[#084F42] shadow-md shadow-[#319685]/30 transition-all cursor-pointer"
         >
           <UserPlus className="w-4 h-4" />
-          <span>+ Cadastrar Colaborador</span>
+          <span>Cadastrar Colaborador</span>
         </button>
       </div>
 

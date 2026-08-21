@@ -180,7 +180,7 @@ export const DayModal: React.FC<DayModalProps> = ({
                 className="inline-flex items-center gap-1 text-xs font-semibold text-[#319685] hover:underline cursor-pointer"
               >
                 <Plus className="w-3 h-3" />
-                <span>+ Registrar atendimento</span>
+                <span>Registrar atendimento</span>
               </button>
             </div>
 

@@ -215,7 +215,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
         </div>
 
         <div className="hidden lg:block text-[10px] text-[#084F42]/50 text-center px-2">
-          Sobreaviso · Casacaresc
+          CASACARESC - v{__APP_VERSION__}
         </div>
       </div>
 
