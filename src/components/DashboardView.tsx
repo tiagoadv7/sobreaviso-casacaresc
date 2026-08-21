@@ -62,16 +62,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const totalMonthlyHours = schedule.reduce((sum, d) => sum + d.hours, 0);
 
-  // Colaboradora com mais horas
+  // Colaboradora com mais horas — só considera quem já tem alguma hora
+  // registrada no mês; sem isso, o sort sempre "escolhe" o primeiro
+  // colaborador da lista mesmo com o mês inteiro zerado.
   const topCollab = activeCollabs
-    .slice()
+    .filter((c) => (totalsByCollab[c.id] || 0) > 0)
     .sort((a, b) => (totalsByCollab[b.id] || 0) - (totalsByCollab[a.id] || 0))[0];
 
   // Proximo turno
   const now = new Date();
   const isCurrentMonth = now.getFullYear() === currentYear && now.getMonth() === currentMonth;
   const todayDay = isCurrentMonth ? now.getDate() : 1;
-  const upcomingShift = schedule.find((d) => d.day >= todayDay && d.collaboratorId) || schedule[0];
+  // Sem fallback para o primeiro dia do mês: se nenhum dia à frente tem
+  // colaborador escalado, não há "próximo plantão" a mostrar.
+  const upcomingShift = schedule.find((d) => d.day >= todayDay && d.collaboratorId) || null;
   const upcomingCollab = upcomingShift
     ? collaborators.find((c) => c.id === upcomingShift.collaboratorId)
     : null;
@@ -220,7 +224,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
           <div className="mt-3">
             <div className="text-xl font-bold text-neutral-900 tracking-tight truncate">
-              {upcomingShift ? `Dia ${upcomingShift.day} · ${upcomingShift.start}` : '-'}
+              {upcomingShift ? `Dia ${upcomingShift.day} · ${upcomingShift.start}` : 'Nenhum agendado'}
             </div>
             <div className="text-[11px] text-neutral-400 mt-0.5 truncate">
               {upcomingCollab?.name || '-'}
