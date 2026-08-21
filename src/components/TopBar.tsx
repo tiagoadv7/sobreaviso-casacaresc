@@ -10,7 +10,6 @@ interface TopBarProps {
   role: UserRole;
   onExport: (format: 'csv' | 'excel') => void;
   onPrint: () => void;
-  onOpenNewCallModal: () => void;
   onOpenNewCollaboratorModal: () => void;
 }
 
@@ -21,7 +20,6 @@ export const TopBar: React.FC<TopBarProps> = ({
   role,
   onExport,
   onPrint,
-  onOpenNewCallModal,
   onOpenNewCollaboratorModal,
 }) => {
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -101,19 +99,6 @@ export const TopBar: React.FC<TopBarProps> = ({
           >
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Adicionar colaborador</span>
-          </button>
-        )}
-
-        {/* Novo registro de demanda — admin e colaborador */}
-        {currentTab === 'chamados' && (
-          <button
-            id="btn-add-call"
-            type="button"
-            onClick={onOpenNewCallModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-semibold bg-[#319685] text-white hover:bg-[#084F42] shadow-sm shadow-[#319685]/30 transition-all cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Novo registro</span>
           </button>
         )}
 

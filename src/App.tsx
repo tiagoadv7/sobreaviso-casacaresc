@@ -403,7 +403,6 @@ function AppInner() {
           role={role}
           onExport={handleExport}
           onPrint={handlePrint}
-          onOpenNewCallModal={() => handleOpenCallModal()}
           onOpenNewCollaboratorModal={() => handleOpenCollaboratorModal()}
         />
 

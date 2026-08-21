@@ -105,7 +105,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
             Cadastro e Histórico de Demandas
           </h2>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Registre os chamados atendidos no sobreaviso. Os gráficos analíticos consolidados estão centralizados na aba <b>Visão geral</b>.
+            Registre os chamados atendidos no sobreaviso. Os gráficos analíticos consolidados estão centralizados na aba <b>Dashboard</b>.
           </p>
         </div>
 
@@ -115,7 +115,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-semibold bg-[#319685] text-white hover:bg-[#084F42] shadow-md shadow-[#319685]/30 transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>+ Cadastrar Nova Demanda</span>
+          <span>+ Cadastrar Demanda</span>
         </button>
       </div>
 
