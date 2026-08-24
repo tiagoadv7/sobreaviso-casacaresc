@@ -204,20 +204,18 @@ export const DemandModal: React.FC<DemandModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl w-full max-w-lg p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-base font-bold text-neutral-900">
-              {editingCall ? 'Editar demanda' : 'Novo registro de demanda'}
-            </h3>
-            <p className="text-xs text-neutral-400 font-medium mt-0.5">
-              Registre o dia, colaborador e tipo de demanda atendida durante o sobreaviso.
-            </p>
-          </div>
+        <div className="relative text-center">
+          <h3 className="text-base font-bold text-neutral-900">
+            {editingCall ? 'Editar demanda' : 'Novo registro de demanda'}
+          </h3>
+          <p className="text-xs text-neutral-400 font-medium mt-0.5">
+            Registre o dia, colaborador e tipo de demanda atendida durante o sobreaviso.
+          </p>
 
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+            className="absolute right-0 top-0 p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -245,7 +243,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
           {/* Dia & Colaborador com Rounded Custom Selects */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Dia do mês *
               </label>
               <CustomSelect
@@ -257,7 +255,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Colaborador *
               </label>
               <CustomSelect
@@ -272,7 +270,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
 
           {/* Demanda Custom Dropdown com Rounded Popover */}
           <div className="space-y-1.5 relative">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Tipo de demanda *
             </label>
 
@@ -369,7 +367,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
           {/* Contato & Beneficiário */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Contato / Solicitante
               </label>
               <input
@@ -382,7 +380,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Beneficiário / Paciente
               </label>
               <input
@@ -397,7 +395,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
 
           {/* Motivo de transferência */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Motivo de transferência (opcional)
             </label>
             <input
@@ -411,7 +409,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
 
           {/* Observação */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Observação (opcional)
             </label>
             <textarea
@@ -426,14 +424,14 @@ export const DemandModal: React.FC<DemandModalProps> = ({
           {/* Horários */}
           <div className="grid grid-cols-2 gap-3.5">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Hora inicial
               </label>
               <TimeSelect value={inicio} onChange={setInicio} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Hora final
               </label>
               <TimeSelect value={fim} onChange={setFim} />
@@ -442,7 +440,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
 
           {/* Status com Custom Select */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Conclusão / Status
             </label>
             <CustomSelect

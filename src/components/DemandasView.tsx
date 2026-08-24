@@ -123,7 +123,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex items-end gap-3.5 flex-wrap hover:border-black/20 transition-all">
         {/* Search */}
         <div className="flex flex-col gap-1.5 w-full sm:flex-1 sm:min-w-[220px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center sm:text-left">
             Buscar por nome / beneficiário
           </label>
           <div className="relative">
@@ -140,7 +140,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
 
         {/* Colaborador */}
         <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[190px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center sm:text-left">
             Colaborador
           </label>
           <CustomSelect
@@ -153,7 +153,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
 
         {/* Demanda */}
         <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[190px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center sm:text-left">
             Demanda
           </label>
           <CustomSelect
@@ -166,7 +166,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
 
         {/* Status */}
         <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[160px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center sm:text-left">
             Status
           </label>
           <CustomSelect
@@ -190,7 +190,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
       </div>
 
       {/* Summary Chips */}
-      <div className="flex items-center flex-wrap gap-3 text-xs text-neutral-600 font-medium">
+      <div className="flex items-center justify-center sm:justify-start flex-wrap gap-3 text-xs text-neutral-600 font-medium">
         <span className="bg-white px-3.5 py-1.5 rounded-2xl border border-black/10 shadow-2xs">
           Exibindo <b>{totalCalls}</b> demandas
         </span>
