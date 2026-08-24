@@ -47,6 +47,30 @@
   }
 }
 
+/* Scrollbar fina e semitransparente — a barra nativa do navegador é opaca
+   e retangular, o que choca visualmente com os cantos arredondados dos
+   cards; esta versão fica discreta e só escurece um pouco no hover. */
+.scroll-soft {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+.scroll-soft::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-soft::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-soft::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.scroll-soft::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.28);
+}
+
 @media print {
   aside, header button, .modal-overlay, #btn-export-csv, #btn-print-pdf, #btn-add-collab, #btn-add-call {
     display: none !important;
