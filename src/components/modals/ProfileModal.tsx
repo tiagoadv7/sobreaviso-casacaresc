@@ -6,6 +6,7 @@ import { useAuth } from '../../auth/AuthContext';
 interface ProfileModalProps {
   isOpen: boolean;
   collaborator: Collaborator | null; // perfil de colaborador se vinculado
+  initialTab?: 'profile' | 'password';
   onClose: () => void;
   onSaveProfile: (updated: Partial<Collaborator>, id: string) => void;
 }
@@ -13,6 +14,7 @@ interface ProfileModalProps {
 export const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
   collaborator,
+  initialTab = 'profile',
   onClose,
   onSaveProfile,
 }) => {
@@ -47,8 +49,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     setConfirmPassword('');
     setError('');
     setSuccess('');
-    setActiveTab('profile');
-  }, [session, collaborator, isOpen]);
+    setActiveTab(initialTab);
+  }, [session, collaborator, isOpen, initialTab]);
 
   if (!isOpen) return null;
 

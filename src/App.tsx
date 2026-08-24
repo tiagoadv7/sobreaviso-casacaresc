@@ -182,6 +182,7 @@ function AppInner() {
 
   // Profile modal (for collaborator editing own profile)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+  const [profileModalTab, setProfileModalTab] = useState<'profile' | 'password'>('profile');
   const ownCollaborator = session?.collaboratorId
     ? collaborators.find((c) => c.id === session.collaboratorId) ?? null
     : null;
@@ -452,7 +453,10 @@ function AppInner() {
       <Sidebar
         currentTab={safeTab}
         onSelectTab={handleSelectTab}
-        onOpenProfile={() => setIsProfileModalOpen(true)}
+        onOpenProfile={(tab) => {
+          setProfileModalTab(tab ?? 'profile');
+          setIsProfileModalOpen(true);
+        }}
       />
 
       <div className="flex-1 flex flex-col min-w-0 my-3 mr-3 gap-3 h-[calc(100dvh-24px)] overflow-hidden">
@@ -589,6 +593,7 @@ function AppInner() {
       <ProfileModal
         isOpen={isProfileModalOpen}
         collaborator={ownCollaborator}
+        initialTab={profileModalTab}
         onClose={() => setIsProfileModalOpen(false)}
         onSaveProfile={handleSaveProfile}
       />

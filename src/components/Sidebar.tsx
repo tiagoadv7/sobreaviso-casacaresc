@@ -16,7 +16,7 @@ import { useAuth } from '../auth/AuthContext';
 interface SidebarProps {
   currentTab: TabView;
   onSelectTab: (tab: TabView) => void;
-  onOpenProfile: () => void;
+  onOpenProfile: (tab?: 'profile' | 'password') => void;
 }
 
 interface NavItem {
@@ -168,7 +168,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
         <div className="bg-white/90 border border-[#319685]/15 rounded-2xl p-2 lg:p-3.5 shadow-2xs">
           <button
             type="button"
-            onClick={onOpenProfile}
+            onClick={() => onOpenProfile('profile')}
             title="Ver / editar meu perfil"
             className="w-full flex flex-col lg:flex-row items-center gap-1.5 lg:gap-2.5 mb-2 lg:mb-3 cursor-pointer rounded-xl transition-colors hover:bg-[#DEEDE0]/40 -m-0.5 p-0.5"
           >
@@ -192,16 +192,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
           </button>
 
           <div className="flex flex-col lg:flex-row gap-1.5">
-            {/* Minha conta / Senha — visível para todos */}
+            {/* Atalho direto para a aba "Alterar Senha" do perfil */}
             <button
               id="btn-open-profile"
               type="button"
-              title="Minha conta"
-              onClick={onOpenProfile}
+              title="Alterar senha"
+              onClick={() => onOpenProfile('password')}
               className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl border border-black/10 text-[11px] font-semibold text-neutral-700 hover:bg-[#DEEDE0]/50 hover:text-[#084F42] transition-all duration-200 ease-out cursor-pointer active:scale-[0.96] active:duration-75"
             >
               <KeyRound className="w-3.5 h-3.5 text-[#319685]" />
-              <span className="hidden lg:inline">Minha conta</span>
+              <span className="hidden lg:inline">Alterar senha</span>
             </button>
 
             {/* Logout */}
