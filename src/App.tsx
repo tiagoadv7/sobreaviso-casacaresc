@@ -466,7 +466,8 @@ function AppInner() {
           onOpenNewCollaboratorModal={() => handleOpenCollaboratorModal()}
         />
 
-        <main className="p-4 sm:p-7 flex-1 overflow-y-auto scroll-soft bg-white rounded-[28px] border border-black/[0.08] shadow-sm">
+        <main className="flex-1 overflow-hidden bg-white rounded-[28px] border border-black/[0.08] shadow-sm">
+        <div className="h-full p-4 sm:p-7 mr-1 overflow-y-auto scroll-soft">
           {safeTab === 'dashboard' && (
             <DashboardView
               collaborators={collaborators}
@@ -531,6 +532,7 @@ function AppInner() {
               onDeleteCollaborator={handleDeleteCollaborator}
             />
           )}
+        </div>
         </main>
       </div>
 
