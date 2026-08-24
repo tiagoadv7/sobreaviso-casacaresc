@@ -264,7 +264,7 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
 
       {/* Resumo semanal de horas */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xs hover:border-black/20 transition-all">
-        <div className="mb-3 sm:mb-4">
+        <div className="mb-3 sm:mb-4 text-center sm:text-left">
           <h2 className="text-sm font-bold text-neutral-900">Resumo semanal de horas</h2>
           <p className="text-xs text-neutral-400">Soma de horas por semana e colaboradora ativa</p>
         </div>
@@ -293,7 +293,7 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
 
       {/* Atendimentos por semana */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xs hover:border-black/20 transition-all">
-        <div className="mb-3 sm:mb-4">
+        <div className="mb-3 sm:mb-4 text-center sm:text-left">
           <h2 className="text-sm font-bold text-neutral-900">Atendimentos por semana</h2>
           <p className="text-xs text-neutral-400">Quantidade de demandas registradas por semana e colaboradora</p>
         </div>

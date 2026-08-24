@@ -115,20 +115,18 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl w-full max-w-md p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-base font-bold text-neutral-900">
-              {editingCollab ? 'Editar colaborador' : 'Adicionar colaborador'}
-            </h3>
-            <p className="text-xs text-neutral-400 font-medium mt-0.5">
-              Preencha os dados da colaboradora ou colaborador de sobreaviso.
-            </p>
-          </div>
+        <div className="relative text-center">
+          <h3 className="text-base font-bold text-neutral-900">
+            {editingCollab ? 'Editar colaborador' : 'Adicionar colaborador'}
+          </h3>
+          <p className="text-xs text-neutral-400 font-medium mt-0.5">
+            Preencha os dados da colaboradora ou colaborador de sobreaviso.
+          </p>
 
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+            className="absolute right-0 top-0 p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -236,11 +234,11 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
           )}
 
           {/* Cor (Swatches) */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 text-center">
             <label className="block text-xs font-semibold text-neutral-700">
               Cor do colaborador
             </label>
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="flex flex-wrap justify-center gap-2 pt-1">
               {PALETTE.map((hex) => (
                 <button
                   key={hex}

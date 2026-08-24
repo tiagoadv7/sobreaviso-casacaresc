@@ -169,7 +169,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
+            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums text-center sm:text-left">
               {fmtHours(totalMonthlyHours)}h
             </div>
             <div className="text-[11px] text-neutral-400 mt-0.5 text-center sm:text-left">
@@ -187,7 +187,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
+            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums text-center sm:text-left">
               {activeCollabs.length}
             </div>
             <div className="text-[11px] text-neutral-400 mt-0.5 text-center sm:text-left">
@@ -205,7 +205,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight truncate">
+            <div className="text-2xl font-bold text-neutral-900 tracking-tight truncate text-center sm:text-left">
               {topCollab?.name || '-'}
             </div>
             <div className="text-[11px] text-neutral-400 mt-0.5 text-center sm:text-left">
@@ -223,7 +223,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-xl font-bold text-neutral-900 tracking-tight truncate">
+            <div className="text-xl font-bold text-neutral-900 tracking-tight truncate text-center sm:text-left">
               {upcomingShift ? `Dia ${upcomingShift.day} · ${upcomingShift.start}` : 'Nenhum agendado'}
             </div>
             <div className="text-[11px] text-neutral-400 mt-0.5 truncate text-center sm:text-left">
@@ -241,7 +241,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
+            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums text-center sm:text-left">
               {calls.length}
             </div>
             <div className="text-[11px] text-neutral-400 mt-0.5 text-center sm:text-left">
@@ -510,13 +510,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* SECTION 3: TABELA DE ÚLTIMAS DEMANDAS */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs overflow-x-auto hover:border-black/20 transition-all">
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+        <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left mb-4">
           <div>
             <h3 className="text-sm font-bold text-neutral-900">Últimas Demandas Registradas</h3>
             <p className="text-xs text-neutral-400">Histórico recente de solicitações atendidas</p>
           </div>
 
-          <div className="flex items-center flex-wrap gap-3">
+          <div className="flex items-center flex-wrap justify-center gap-3">
             <button
               type="button"
               onClick={onOpenNewCallModal}
