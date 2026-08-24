@@ -455,7 +455,7 @@ function AppInner() {
         onOpenProfile={() => setIsProfileModalOpen(true)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 my-3 mr-3 bg-white rounded-[28px] border border-black/[0.08] shadow-sm overflow-hidden h-[calc(100dvh-24px)]">
+      <div className="flex-1 flex flex-col min-w-0 my-3 mr-3 gap-3 h-[calc(100dvh-24px)]">
         <TopBar
           currentTab={safeTab}
           currentYear={currentYear}
@@ -466,7 +466,7 @@ function AppInner() {
           onOpenNewCollaboratorModal={() => handleOpenCollaboratorModal()}
         />
 
-        <main className="p-4 sm:p-7 flex-1 overflow-y-auto bg-white rounded-b-[28px]">
+        <main className="p-4 sm:p-7 flex-1 overflow-y-auto bg-white rounded-[28px] border border-black/[0.08] shadow-sm">
           {safeTab === 'dashboard' && (
             <DashboardView
               collaborators={collaborators}

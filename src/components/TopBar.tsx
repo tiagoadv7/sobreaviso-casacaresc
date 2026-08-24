@@ -70,7 +70,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   const isAdmin = role === 'admin';
 
   return (
-    <header className="px-4 sm:px-7 py-4 bg-white rounded-t-[28px] shrink-0">
+    <header className="px-4 sm:px-7 py-4 bg-white rounded-[28px] border border-black/[0.08] shadow-sm shrink-0">
       {/* Logo — só no mobile, acima e centralizada */}
       <div className="lg:hidden flex justify-center pb-3">
         <img src="/logo.svg" alt="Casacaresc" className="w-32 h-auto" />
@@ -155,13 +155,6 @@ export const TopBar: React.FC<TopBarProps> = ({
           </>
         )}
       </div>
-      </div>
-
-      {/* Divisor suave, com pontas arredondadas, em vez de uma linha reta
-          de ponta a ponta — evita o corte "quadrado" entre o cabeçalho e o
-          conteúdo abaixo. */}
-      <div className="flex justify-center pt-4">
-        <div className="w-12 h-1 rounded-full bg-black/[0.06]" />
       </div>
     </header>
   );
