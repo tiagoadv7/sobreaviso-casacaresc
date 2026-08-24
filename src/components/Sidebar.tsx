@@ -8,7 +8,6 @@ import {
   Users,
   ShieldCheck,
   LogOut,
-  UserCircle,
   AlertTriangle,
   KeyRound,
 } from 'lucide-react';
@@ -91,18 +90,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
     .toUpperCase();
 
   return (
-    <aside className="w-64 shrink-0 p-4 flex flex-col justify-between h-screen bg-transparent select-none">
+    <aside className="w-16 lg:w-64 shrink-0 p-2 lg:p-4 flex flex-col justify-between h-dvh bg-[#edf2f7] lg:bg-transparent select-none overflow-y-auto scroll-soft">
       <div>
-        {/* Brand */}
-        <div className="flex flex-col items-center gap-2 px-2 pt-2 pb-6 text-center">
+        {/* Brand — só no desktop; no mobile a logo já aparece na barra superior */}
+        <div className="hidden lg:flex flex-col items-center gap-2 px-2 pt-2 pb-6 text-center">
           <img src="/logo.svg" alt="Casacaresc" className="w-36 h-auto" />
           <div className="text-[15px] font-bold text-[#084F42] tracking-tight leading-tight">
             Sobreaviso
           </div>
         </div>
+        <div className="lg:hidden h-2" />
 
         {/* Nav Section Label */}
-        <div className="text-[11px] font-semibold text-[#084F42]/60 uppercase tracking-wider px-3 py-2">
+        <div className="hidden lg:block text-[11px] font-semibold text-[#084F42]/60 uppercase tracking-wider px-3 py-2">
           Menu Principal
         </div>
 
@@ -114,18 +114,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
                 key={item.id}
                 id={`nav-btn-${item.id}`}
                 type="button"
+                title={item.label}
                 onClick={() => onSelectTab(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-medium cursor-pointer transition-all duration-200 ease-out active:scale-[0.97] active:duration-75 ${
+                className={`w-full flex items-center justify-center lg:justify-between px-0 lg:px-3.5 py-2.5 rounded-2xl text-sm font-medium cursor-pointer transition-all duration-200 ease-out active:scale-[0.97] active:duration-75 ${
                   isActive
                     ? 'bg-[#319685]/15 text-[#084F42] font-bold shadow-2xs border border-[#319685]/20'
-                    : 'text-neutral-600 border border-transparent hover:bg-[#DEEDE0]/60 hover:text-[#084F42] hover:translate-x-0.5'
+                    : 'text-neutral-600 border border-transparent hover:bg-[#DEEDE0]/60 hover:text-[#084F42] lg:hover:translate-x-0.5'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <span className={`transition-colors duration-200 ${isActive ? 'text-[#319685]' : 'text-neutral-400'}`}>
                     {item.icon}
                   </span>
-                  <span>{item.label}</span>
+                  <span className="hidden lg:inline">{item.label}</span>
                 </div>
               </button>
             );
@@ -135,25 +136,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
         {/* Admin Section */}
         {adminItem && (
           <>
-            <div className="text-[11px] font-semibold text-[#084F42]/70 uppercase tracking-wider px-3 py-2 mt-4">
+            <div className="hidden lg:block text-[11px] font-semibold text-[#084F42]/70 uppercase tracking-wider px-3 py-2 mt-4">
               Administração
             </div>
-            <nav className="flex flex-col gap-1">
+            <nav className="flex flex-col gap-1 mt-1 lg:mt-0">
               <button
                 key={adminItem.id}
                 id={`nav-btn-${adminItem.id}`}
                 type="button"
+                title={adminItem.label}
                 onClick={() => onSelectTab(adminItem.id)}
-                className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-sm font-medium cursor-pointer transition-all duration-200 ease-out active:scale-[0.97] active:duration-75 ${
+                className={`w-full flex items-center justify-center lg:justify-start gap-0 lg:gap-2.5 px-0 lg:px-3.5 py-2.5 rounded-2xl text-sm font-medium cursor-pointer transition-all duration-200 ease-out active:scale-[0.97] active:duration-75 ${
                   currentTab === adminItem.id
                     ? 'bg-[#084F42] text-white font-semibold shadow-md shadow-[#084F42]/20'
-                    : 'text-neutral-600 hover:bg-[#DEEDE0]/70 hover:text-[#084F42] hover:translate-x-0.5'
+                    : 'text-neutral-600 hover:bg-[#DEEDE0]/70 hover:text-[#084F42] lg:hover:translate-x-0.5'
                 }`}
               >
                 <span className={`transition-colors duration-200 ${currentTab === adminItem.id ? 'text-[#6BC0B2]' : 'text-neutral-400'}`}>
                   {adminItem.icon}
                 </span>
-                <span>{adminItem.label}</span>
+                <span className="hidden lg:inline">{adminItem.label}</span>
               </button>
             </nav>
           </>
@@ -163,10 +165,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
       {/* Footer: user info + profile + logout */}
       <div className="space-y-2">
         {/* User card */}
-        <div className="bg-white/90 border border-[#319685]/15 rounded-2xl p-3.5 shadow-2xs">
-          <div className="flex items-center gap-2.5 mb-3">
+        <div className="bg-white/90 border border-[#319685]/15 rounded-2xl p-2 lg:p-3.5 shadow-2xs">
+          <div className="flex flex-col lg:flex-row items-center gap-1.5 lg:gap-2.5 mb-2 lg:mb-3">
             <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+              title={session?.displayName ?? 'Usuário'}
+              className={`w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                 role === 'admin'
                   ? 'bg-[#084F42] text-white'
                   : 'bg-[#319685]/15 text-[#319685]'
@@ -174,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
             >
               {initials}
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="hidden lg:block min-w-0 flex-1">
               <p className="text-xs font-bold text-neutral-900 truncate">
                 {session?.displayName ?? 'Usuário'}
               </p>
@@ -184,33 +187,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
             </div>
           </div>
 
-          <div className="flex gap-1.5">
+          <div className="flex flex-col lg:flex-row gap-1.5">
             {/* Minha conta / Senha — visível para todos */}
             <button
               id="btn-open-profile"
               type="button"
+              title="Minha conta"
               onClick={onOpenProfile}
               className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl border border-black/10 text-[11px] font-semibold text-neutral-700 hover:bg-[#DEEDE0]/50 hover:text-[#084F42] transition-all duration-200 ease-out cursor-pointer active:scale-[0.96] active:duration-75"
             >
               <KeyRound className="w-3.5 h-3.5 text-[#319685]" />
-              Minha conta
+              <span className="hidden lg:inline">Minha conta</span>
             </button>
 
             {/* Logout */}
             <button
               id="btn-logout"
               type="button"
+              title="Sair"
               onClick={() => setShowLogoutModal(true)}
-              className="flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl border border-[#E84A4E]/20 text-[11px] font-semibold text-[#E84A4E] hover:bg-[#E84A4E]/10 transition-all duration-200 ease-out cursor-pointer active:scale-[0.96] active:duration-75"
+              className="flex items-center justify-center gap-1 py-1.5 lg:px-3 rounded-xl border border-[#E84A4E]/20 text-[11px] font-semibold text-[#E84A4E] hover:bg-[#E84A4E]/10 transition-all duration-200 ease-out cursor-pointer active:scale-[0.96] active:duration-75"
             >
               <LogOut className="w-3.5 h-3.5" />
-              Sair
+              <span className="hidden lg:inline">Sair</span>
             </button>
           </div>
         </div>
 
-        <div className="text-[10px] text-[#084F42]/50 text-center px-2">
-          Sobreaviso · Casacaresc
+        <div className="hidden lg:block text-[10px] text-[#084F42]/50 text-center px-2">
+          CASACARESC - v{__APP_VERSION__}
         </div>
       </div>
 

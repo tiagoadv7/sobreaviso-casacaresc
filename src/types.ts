@@ -1,6 +1,6 @@
 export type ShiftKind = 'semana' | 'fim_de_semana' | 'apoio';
 export type CallStatus = 'pendente' | 'concluido';
-export type CollaboratorStatus = 'ativo' | 'licenca';
+export type CollaboratorStatus = 'ativo' | 'licenca' | 'ferias' | 'personalizado';
 
 export interface Collaborator {
   id: string;
@@ -10,6 +10,7 @@ export interface Collaborator {
   contact: string;
   color: string;
   status: CollaboratorStatus;
+  customStatusLabel: string; // usado apenas quando status === 'personalizado'
   note: string;
 }
 
@@ -27,6 +28,7 @@ export interface CallRecord {
   contato: string;
   beneficiario: string;
   motivo: string;
+  observacao: string;
   inicio: string; // "19:10"
   fim: string;    // "19:40"
   status: CallStatus;
@@ -67,4 +69,5 @@ export interface SystemUser {
   collaboratorId?: string;   // vinculado ao Collaborator.id
   disabled?: boolean;
   createdAt?: string;
+  mustChangePassword?: boolean; // true até o primeiro acesso definir uma senha própria
 }

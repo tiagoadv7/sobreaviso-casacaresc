@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Collaborator, DaySchedule, CallRecord, DemandType } from '../../types';
 import { MONTH_NAMES } from '../../utils/constants';
 import {
+  collaboratorStatusLabel,
   computeDurationHours,
   computeDurationText,
+  defaultShiftHoursForKind,
   fmtHours,
   pad,
 } from '../../utils/calc';
 import { X, Plus, Trash2, User, ShieldCheck } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../CustomSelect';
+import { TimeSelect } from '../TimeSelect';
 import { useAuth } from '../../auth/AuthContext';
 
 interface DayModalProps {
@@ -46,8 +49,16 @@ export const DayModal: React.FC<DayModalProps> = ({
   useEffect(() => {
     if (daySchedule) {
       setCollaboratorId(daySchedule.collaboratorId);
-      setStart(daySchedule.start);
-      setEnd(daySchedule.end);
+      if (daySchedule.start && daySchedule.end) {
+        setStart(daySchedule.start);
+        setEnd(daySchedule.end);
+      } else {
+        // Horário padrão sugerido para um dia ainda sem plantão definido —
+        // o administrador pode alterar livremente antes de salvar.
+        const defaults = defaultShiftHoursForKind(daySchedule.kind);
+        setStart(defaults.start);
+        setEnd(defaults.end);
+      }
     }
   }, [daySchedule]);
 
@@ -68,7 +79,7 @@ export const DayModal: React.FC<DayModalProps> = ({
     value: c.id,
     label: c.name,
     color: c.color,
-    badge: c.status === 'licenca' ? 'Em licença' : undefined,
+    badge: c.status !== 'ativo' ? collaboratorStatusLabel(c) : undefined,
     icon: <User className="w-3.5 h-3.5 text-neutral-400" />,
   }));
 
@@ -137,30 +148,14 @@ export const DayModal: React.FC<DayModalProps> = ({
               <label className="block text-xs font-semibold text-neutral-700">
                 Hora inicial
               </label>
-              <input
-                type="time"
-                value={start}
-                disabled={!isAdmin}
-                onChange={(e) => setStart(e.target.value)}
-                className={`w-full px-3.5 py-2 rounded-2xl border border-black/10 text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs ${
-                  isAdmin ? 'bg-[#fcfcfb]' : 'bg-neutral-100/70 opacity-80 cursor-not-allowed'
-                }`}
-              />
+              <TimeSelect value={start} disabled={!isAdmin} onChange={setStart} />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-neutral-700">
                 Hora final
               </label>
-              <input
-                type="time"
-                value={end}
-                disabled={!isAdmin}
-                onChange={(e) => setEnd(e.target.value)}
-                className={`w-full px-3.5 py-2 rounded-2xl border border-black/10 text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs ${
-                  isAdmin ? 'bg-[#fcfcfb]' : 'bg-neutral-100/70 opacity-80 cursor-not-allowed'
-                }`}
-              />
+              <TimeSelect value={end} disabled={!isAdmin} onChange={setEnd} />
             </div>
           </div>
 
@@ -185,7 +180,7 @@ export const DayModal: React.FC<DayModalProps> = ({
                 className="inline-flex items-center gap-1 text-xs font-semibold text-[#319685] hover:underline cursor-pointer"
               >
                 <Plus className="w-3 h-3" />
-                <span>+ Registrar atendimento</span>
+                <span>Registrar atendimento</span>
               </button>
             </div>
 
@@ -239,7 +234,7 @@ export const DayModal: React.FC<DayModalProps> = ({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-black/5">
+        <div className="flex items-center justify-end flex-wrap gap-2.5 pt-4 border-t border-black/5">
           {isAdmin && daySchedule.isCustom && (
             <button
               type="button"

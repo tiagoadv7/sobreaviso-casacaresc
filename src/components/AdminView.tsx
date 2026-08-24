@@ -21,8 +21,11 @@ import {
 } from 'lucide-react';
 import { Collaborator, SystemUser, UserRole } from '../types';
 import { useAuth } from '../auth/AuthContext';
-import { forceSyncInitialData, clearAllCollaborators } from '../firebase/db';
+import { forceSyncInitialData, clearAllCollaborators, saveCollaborator, syncCollaboratorsFromUsers } from '../firebase/db';
+import { PALETTE } from '../utils/constants';
+import { collaboratorStatusLabel } from '../utils/calc';
 import { CustomSelect, SelectOption } from './CustomSelect';
+import { ConfirmModal } from './modals/ConfirmModal';
 
 interface AdminViewProps {
   collaborators: Collaborator[];
@@ -42,8 +45,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-[#319685]/15 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <div className="w-10 h-10 rounded-2xl bg-[#319685]/15 flex items-center justify-center shrink-0">
           <ShieldCheck className="w-5 h-5 text-[#084F42]" />
         </div>
         <div>
@@ -53,7 +56,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex gap-1 p-1 bg-neutral-100 rounded-2xl w-fit">
+      <div className="flex gap-1 p-1 bg-neutral-100 rounded-2xl w-fit mx-auto">
         {(
           [
             { id: 'usuarios', label: 'Usuários do sistema', icon: <KeyRound className="w-3.5 h-3.5" /> },
@@ -92,13 +95,40 @@ export const AdminView: React.FC<AdminViewProps> = ({
 /* ─── Painel de Usuários Firebase ─── */
 const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators }) => {
   const { users, session, createUser, updateUserRole, updateUserCollaboratorLink,
-    updateUserDisplayName, sendPasswordReset, disableUser, enableUser } = useAuth();
+    updateUserDisplayName, setUserMustChangePassword, sendPasswordReset, disableUser, enableUser } = useAuth();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingUser, setEditingUser] = useState<SystemUser | null>(null);
   const [feedback, setFeedback] = useState<{ uid: string; msg: string; type: 'ok' | 'err' } | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  const [isLinkingCollabs, setIsLinkingCollabs] = useState(false);
+  const [linkCollabsStatus, setLinkCollabsStatus] = useState<string | null>(null);
+  const [selectedUids, setSelectedUids] = useState<Set<string>>(new Set());
+
+  const collaboratorIds = new Set(collaborators.map((c) => c.id));
+  // Só faz sentido oferecer para colaboradores — admins não costumam
+  // precisar de um registro de escala próprio, e o pedido é selecionar
+  // manualmente quem deve ganhar um colaborador vinculado.
+  const candidateUsers = users.filter(
+    (u) => u.role !== 'admin' && (!u.collaboratorId || !collaboratorIds.has(u.collaboratorId))
+  );
+  const candidateUidSet = new Set(candidateUsers.map((u) => u.uid));
+
+  const toggleCandidateSelection = (uid: string) => {
+    setSelectedUids((prev) => {
+      const next = new Set(prev);
+      if (next.has(uid)) next.delete(uid);
+      else next.add(uid);
+      return next;
+    });
+  };
+
+  const toggleSelectAllCandidates = () => {
+    setSelectedUids((prev) =>
+      prev.size === candidateUsers.length ? new Set() : new Set(candidateUsers.map((u) => u.uid))
+    );
+  };
 
   const showFeedback = (uid: string, msg: string, type: 'ok' | 'err' = 'ok') => {
     setFeedback({ uid, msg, type });
@@ -117,6 +147,24 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
       setTimeout(() => setSyncStatus(null), 4000);
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const handleLinkCollaborators = async () => {
+    const usersToLink = candidateUsers.filter((u) => selectedUids.has(u.uid));
+    if (usersToLink.length === 0) return;
+    setIsLinkingCollabs(true);
+    setLinkCollabsStatus(null);
+    try {
+      const created = await syncCollaboratorsFromUsers(usersToLink, collaborators);
+      setLinkCollabsStatus(`✓ ${created} colaborador${created !== 1 ? 'es' : ''} criado${created !== 1 ? 's' : ''}.`);
+      setSelectedUids(new Set());
+      setTimeout(() => setLinkCollabsStatus(null), 4000);
+    } catch {
+      setLinkCollabsStatus('Erro ao gerar colaboradores. Verifique as regras do Firestore.');
+      setTimeout(() => setLinkCollabsStatus(null), 4000);
+    } finally {
+      setIsLinkingCollabs(false);
     }
   };
 
@@ -158,13 +206,45 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
           <span>{syncStatus}</span>
         </div>
       )}
+      {linkCollabsStatus && (
+        <div className="p-3 rounded-2xl bg-[#DEEDE0] text-[#084F42] border border-[#319685]/30 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+          <Users className="w-4 h-4 text-[#319685]" />
+          <span>{linkCollabsStatus}</span>
+        </div>
+      )}
 
       <div className="flex items-center justify-between flex-wrap gap-2">
         <p className="text-xs text-neutral-500 font-medium">
           {users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''}
         </p>
-        
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center flex-wrap gap-2">
+          {candidateUsers.length > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={toggleSelectAllCandidates}
+                className="text-[11px] font-semibold text-amber-700 hover:text-amber-900 underline underline-offset-2 cursor-pointer px-1"
+              >
+                {selectedUids.size === candidateUsers.length ? 'Desmarcar todos' : 'Marcar todos'}
+              </button>
+              <button
+                type="button"
+                onClick={handleLinkCollaborators}
+                disabled={isLinkingCollabs || selectedUids.size === 0}
+                title="Cria um colaborador vinculado para cada usuário marcado com 'Sem colaborador' na lista abaixo"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border border-amber-300 bg-amber-50 text-amber-700 text-xs font-semibold hover:bg-amber-100 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>
+                  {isLinkingCollabs
+                    ? 'Gerando…'
+                    : `Gerar colaborador${selectedUids.size !== 1 ? 'es' : ''}${selectedUids.size > 0 ? ` (${selectedUids.size})` : ''}`}
+                </span>
+              </button>
+            </>
+          )}
+
           <button
             type="button"
             onClick={handleSyncDatabase}
@@ -230,6 +310,22 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
                   </span>
                 )}
 
+                {/* Sem colaborador vinculado — selecionar para gerar em lote */}
+                {candidateUidSet.has(u.uid) && (
+                  <label
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 text-[11px] font-semibold text-amber-700 cursor-pointer hover:bg-amber-100 transition-colors"
+                    title="Marcar para gerar um colaborador vinculado a este usuário"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedUids.has(u.uid)}
+                      onChange={() => toggleCandidateSelection(u.uid)}
+                      className="w-3.5 h-3.5 rounded accent-amber-600 cursor-pointer"
+                    />
+                    Sem colaborador
+                  </label>
+                )}
+
                 {/* Editar */}
                 <button
                   id={`btn-edit-user-${u.uid}`}
@@ -291,6 +387,7 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
           collaborators={collaborators}
           onClose={() => setShowCreateModal(false)}
           onCreate={createUser}
+          onLinkCollaborator={updateUserCollaboratorLink}
           onSendReset={sendPasswordReset}
         />
       )}
@@ -303,6 +400,8 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
           onClose={() => setEditingUser(null)}
           onUpdateName={updateUserDisplayName}
           onUpdateCollab={updateUserCollaboratorLink}
+          onSetMustChangePassword={setUserMustChangePassword}
+          onSendReset={sendPasswordReset}
         />
       )}
     </div>
@@ -313,13 +412,16 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
 const CreateUserModal: React.FC<{
   collaborators: Collaborator[];
   onClose: () => void;
-  onCreate: (email: string, password: string, data: { displayName: string; role: UserRole; collaboratorId?: string }) => Promise<void>;
+  onCreate: (email: string, password: string, data: { displayName: string; role: UserRole; collaboratorId?: string; mustChangePassword?: boolean }) => Promise<string>;
+  onLinkCollaborator: (uid: string, collaboratorId: string | null) => Promise<void>;
   onSendReset: (email: string) => Promise<void>;
-}> = ({ collaborators, onClose, onCreate, onSendReset }) => {
+}> = ({ collaborators, onClose, onCreate, onLinkCollaborator, onSendReset }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const [mustChangePassword, setMustChangePassword] = useState(true);
   const [displayName, setDisplayName] = useState('');
+  const [matricula, setMatricula] = useState('');
   const [role, setRole] = useState<UserRole>('colaborador');
   const [collaboratorId, setCollaboratorId] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -336,11 +438,32 @@ const CreateUserModal: React.FC<{
     setIsOrphanConflict(false);
     setResetStatus('');
     try {
-      await onCreate(email.trim(), password, {
+      // Cria o usuário primeiro — só depois de confirmado que ele existe é
+      // que criamos o colaborador, para não sobrar um colaborador órfão no
+      // Firestore caso a criação do usuário falhe (ex: e-mail duplicado).
+      const uid = await onCreate(email.trim(), password, {
         displayName: displayName.trim(),
         role,
         collaboratorId: collaboratorId || undefined,
+        mustChangePassword,
       });
+
+      // Se nenhum colaborador existente foi selecionado, cria um novo
+      // automaticamente com o mesmo nome e vincula ao usuário recém-criado.
+      if (!collaboratorId) {
+        const newCollaboratorId = await saveCollaborator({
+          name: displayName.trim(),
+          role: '',
+          matricula: matricula.trim(),
+          contact: '',
+          color: PALETTE[collaborators.length % PALETTE.length],
+          status: 'ativo',
+          customStatusLabel: '',
+          note: '',
+        });
+        await onLinkCollaborator(uid, newCollaboratorId);
+      }
+
       onClose();
     } catch (err: unknown) {
       const code = (err as { code?: string }).code ?? '';
@@ -360,12 +483,10 @@ const CreateUserModal: React.FC<{
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl w-full max-w-md p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-base font-bold text-neutral-900">Criar novo usuário</h3>
-            <p className="text-xs text-neutral-400 mt-0.5">O usuário receberá acesso ao sistema com estas credenciais.</p>
-          </div>
-          <button type="button" onClick={onClose} className="p-2 rounded-xl text-neutral-400 hover:bg-neutral-100 cursor-pointer">
+        <div className="relative text-center">
+          <h3 className="text-base font-bold text-neutral-900">Criar novo usuário</h3>
+          <p className="text-xs text-neutral-400 mt-0.5">O usuário receberá acesso ao sistema com estas credenciais.</p>
+          <button type="button" onClick={onClose} className="absolute right-0 top-0 p-2 rounded-xl text-neutral-400 hover:bg-neutral-100 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -409,39 +530,50 @@ const CreateUserModal: React.FC<{
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Nome */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Nome completo *</label>
+            <label className="block text-xs font-semibold text-neutral-700 text-center">Nome completo *</label>
             <input type="text" placeholder="Ex: Fernanda Silva" value={displayName}
               onChange={(e) => setDisplayName(e.target.value)} required
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
           </div>
 
           {/* Email */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
+            <label className="block text-xs font-semibold text-neutral-700 flex items-center justify-center gap-1.5">
               <Mail className="w-3.5 h-3.5 text-[#319685]" /> E-mail *
             </label>
             <input type="email" placeholder="email@casacaresc.org.br" value={email}
               onChange={(e) => setEmail(e.target.value)} required
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
           </div>
 
           {/* Senha */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Senha inicial * (mín. 6 caracteres)</label>
+            <label className="block text-xs font-semibold text-neutral-700 text-center">Senha inicial * (mín. 6 caracteres)</label>
             <div className="relative">
               <input type={showPw ? 'text' : 'password'} placeholder="••••••••" value={password}
                 onChange={(e) => setPassword(e.target.value)} required
-                className="w-full pl-3.5 pr-10 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+                className="w-full pl-10 pr-10 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
               <button type="button" onClick={() => setShowPw((v) => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer">
                 {showPw ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               </button>
             </div>
+            <label className="flex items-center gap-2 pt-0.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={mustChangePassword}
+                onChange={(e) => setMustChangePassword(e.target.checked)}
+                className="w-3.5 h-3.5 rounded accent-[#319685] cursor-pointer"
+              />
+              <span className="text-[11px] text-neutral-600 font-medium">
+                Pedir para criar uma nova senha no primeiro acesso
+              </span>
+            </label>
           </div>
 
           {/* Função / Role */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Função no sistema *</label>
+            <label className="block text-xs font-semibold text-neutral-700 text-center">Função no sistema *</label>
             <div className="flex gap-2">
               {(['colaborador', 'admin'] as UserRole[]).map((r) => (
                 <button key={r} type="button" onClick={() => setRole(r)}
@@ -460,11 +592,14 @@ const CreateUserModal: React.FC<{
           </div>
 
           {/* Vincular colaborador */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Vincular a colaborador (opcional)</label>
+          <div className="space-y-1.5 text-center">
+            <label className="block text-xs font-semibold text-neutral-700">Vincular a colaborador existente (opcional)</label>
+            <p className="text-[11px] text-neutral-400 -mt-0.5">
+              Se deixar em "— Nenhum —", um colaborador novo com o nome acima é criado automaticamente.
+            </p>
             <CustomSelect
               options={[
-                { value: '', label: '— Nenhum —' },
+                { value: '', label: '— Nenhum — (criar novo automaticamente)' },
                 ...collaborators.map((c): SelectOption => ({ value: c.id, label: `${c.name} (${c.role})`, color: c.color })),
               ]}
               value={collaboratorId}
@@ -472,6 +607,18 @@ const CreateUserModal: React.FC<{
               placeholder="— Nenhum —"
             />
           </div>
+
+          {/* Matrícula do novo colaborador (só faz sentido quando um novo
+              colaborador vai ser criado — se um já existente foi selecionado
+              acima, a matrícula dele é editada na tela de Colaboradores). */}
+          {!collaboratorId && (
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">Matrícula (opcional)</label>
+              <input type="text" placeholder="Ex: 0007" value={matricula}
+                onChange={(e) => setMatricula(e.target.value)}
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+            </div>
+          )}
 
           <div className="flex gap-2.5 pt-4 border-t border-black/5">
             <button type="button" onClick={onClose}
@@ -496,11 +643,16 @@ const EditUserModal: React.FC<{
   onClose: () => void;
   onUpdateName: (uid: string, name: string) => Promise<void>;
   onUpdateCollab: (uid: string, collabId: string | null) => Promise<void>;
-}> = ({ user, collaborators, onClose, onUpdateName, onUpdateCollab }) => {
+  onSetMustChangePassword: (uid: string, value: boolean) => Promise<void>;
+  onSendReset: (email: string) => Promise<void>;
+}> = ({ user, collaborators, onClose, onUpdateName, onUpdateCollab, onSetMustChangePassword, onSendReset }) => {
   const [displayName, setDisplayName] = useState(user.displayName);
   const [collaboratorId, setCollaboratorId] = useState(user.collaboratorId ?? '');
+  const [mustChangePassword, setMustChangePassword] = useState(user.mustChangePassword ?? false);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [resetStatus, setResetStatus] = useState('');
+  const [sendingReset, setSendingReset] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -508,40 +660,54 @@ const EditUserModal: React.FC<{
     await Promise.all([
       displayName !== user.displayName ? onUpdateName(user.uid, displayName) : Promise.resolve(),
       collaboratorId !== (user.collaboratorId ?? '') ? onUpdateCollab(user.uid, collaboratorId || null) : Promise.resolve(),
+      mustChangePassword !== (user.mustChangePassword ?? false)
+        ? onSetMustChangePassword(user.uid, mustChangePassword)
+        : Promise.resolve(),
     ]);
     setLoading(false);
     setSaved(true);
     setTimeout(onClose, 800);
   };
 
+  const handleSendReset = async () => {
+    setSendingReset(true);
+    setResetStatus('');
+    try {
+      await onSendReset(user.email);
+      setResetStatus('✓ Link enviado para ' + user.email);
+    } catch {
+      setResetStatus('Erro ao enviar o link. Tente novamente.');
+    } finally {
+      setSendingReset(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl w-full max-w-sm p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-base font-bold text-neutral-900">Editar usuário</h3>
-            <p className="text-xs text-neutral-400 mt-0.5">{user.email}</p>
-          </div>
-          <button type="button" onClick={onClose} className="p-2 rounded-xl text-neutral-400 hover:bg-neutral-100 cursor-pointer">
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl w-full max-w-sm p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+        <div className="relative text-center">
+          <h3 className="text-base font-bold text-neutral-900">Editar usuário</h3>
+          <p className="text-xs text-neutral-400 mt-0.5">{user.email}</p>
+          <button type="button" onClick={onClose} className="absolute right-0 top-0 p-2 rounded-xl text-neutral-400 hover:bg-neutral-100 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {saved && (
-          <div className="text-xs text-emerald-700 bg-emerald-50 p-3 rounded-2xl border border-emerald-200 flex items-center gap-2">
+          <div className="text-xs text-emerald-700 bg-emerald-50 p-3 rounded-2xl border border-emerald-200 flex items-center justify-center gap-2">
             <CheckCircle2 className="w-3.5 h-3.5" /> Alterações salvas!
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Nome de exibição</label>
+            <label className="block text-xs font-semibold text-neutral-700 text-center">Nome de exibição</label>
             <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Vincular a colaborador</label>
+            <label className="block text-xs font-semibold text-neutral-700 text-center">Vincular a colaborador</label>
             <CustomSelect
               options={[
                 { value: '', label: '— Nenhum —' },
@@ -551,6 +717,34 @@ const EditUserModal: React.FC<{
               onChange={setCollaboratorId}
               placeholder="— Nenhum —"
             />
+          </div>
+
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={mustChangePassword}
+              onChange={(e) => setMustChangePassword(e.target.checked)}
+              className="w-3.5 h-3.5 rounded accent-[#319685] cursor-pointer"
+            />
+            <span className="text-[11px] text-neutral-600 font-medium">
+              Pedir para criar uma nova senha no próximo acesso
+            </span>
+          </label>
+
+          <div className="space-y-2 pt-3.5 border-t border-black/5">
+            <p className="text-xs font-semibold text-neutral-700 text-center">Senha</p>
+            <button
+              type="button"
+              onClick={handleSendReset}
+              disabled={sendingReset}
+              className="w-full flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-2xl border border-[#319685]/30 bg-[#DEEDE0]/40 text-[#084F42] text-xs font-semibold hover:bg-[#DEEDE0] transition-all cursor-pointer disabled:opacity-60"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-[#319685]" />
+              {sendingReset ? 'Enviando…' : 'Enviar link de redefinição de senha'}
+            </button>
+            {resetStatus && (
+              <p className="text-[11px] text-neutral-500 text-center">{resetStatus}</p>
+            )}
           </div>
 
           <div className="flex gap-2.5 pt-4 border-t border-black/5">
@@ -577,13 +771,10 @@ const ColaboradoresAdminPanel: React.FC<{
 }> = ({ collaborators, onOpenModal, onDelete }) => {
   const [isClearing, setIsClearing] = useState(false);
   const [clearStatus, setClearStatus] = useState<string | null>(null);
+  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
 
   const handleClearAll = async () => {
-    if (collaborators.length === 0) return;
-    if (!window.confirm(
-      `Isso vai excluir permanentemente os ${collaborators.length} colaboradores cadastrados no Firestore. Deseja continuar?`
-    )) return;
-
+    setShowClearAllConfirm(false);
     setIsClearing(true);
     setClearStatus(null);
     try {
@@ -611,12 +802,12 @@ const ColaboradoresAdminPanel: React.FC<{
       <p className="text-xs text-neutral-500 font-medium">
         {collaborators.length} colaborador{collaborators.length !== 1 ? 'es' : ''} cadastrado{collaborators.length !== 1 ? 's' : ''}
       </p>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center flex-wrap gap-2">
         {collaborators.length > 0 && (
           <button
             id="admin-btn-clear-collabs"
             type="button"
-            onClick={handleClearAll}
+            onClick={() => setShowClearAllConfirm(true)}
             disabled={isClearing}
             className="flex items-center gap-1.5 px-4 py-2 rounded-2xl border border-[#E84A4E]/20 text-[#E84A4E] text-xs font-semibold hover:bg-[#E84A4E]/10 transition-all cursor-pointer disabled:opacity-60"
             title="Remove todos os colaboradores cadastrados no Firestore"
@@ -634,23 +825,23 @@ const ColaboradoresAdminPanel: React.FC<{
 
     <div className="space-y-2">
       {collaborators.map((c) => (
-        <div key={c.id} className="flex items-center justify-between bg-neutral-50 border border-black/5 rounded-2xl px-4 py-3.5">
-          <div className="flex items-center gap-3">
+        <div key={c.id} className="flex items-center justify-between flex-wrap gap-2 bg-neutral-50 border border-black/5 rounded-2xl px-4 py-3.5">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
               style={{ backgroundColor: c.color }}>
               {c.name.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <p className="text-xs font-semibold text-neutral-900">{c.name}</p>
-              <p className="text-[11px] text-neutral-400">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-neutral-900 truncate">{c.name}</p>
+              <p className="text-[11px] text-neutral-400 truncate">
                 {c.role} · Mat. {c.matricula} ·{' '}
                 <span className={c.status === 'ativo' ? 'text-emerald-600' : 'text-[#E84A4E]'}>
-                  {c.status === 'ativo' ? 'Ativo' : 'Em licença'}
+                  {collaboratorStatusLabel(c)}
                 </span>
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button id={`admin-edit-collab-${c.id}`} type="button" onClick={() => onOpenModal(c.id)}
               className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-black/10 text-[11px] font-semibold text-neutral-600 hover:bg-neutral-100 transition-colors cursor-pointer">
               <Pencil className="w-3 h-3" /> Editar
@@ -663,6 +854,16 @@ const ColaboradoresAdminPanel: React.FC<{
         </div>
       ))}
     </div>
+
+    <ConfirmModal
+      isOpen={showClearAllConfirm}
+      title="Limpar todos os colaboradores"
+      message={`Isso vai excluir permanentemente os ${collaborators.length} colaboradores cadastrados no Firestore. Deseja continuar?`}
+      confirmLabel="Excluir todos"
+      loading={isClearing}
+      onConfirm={handleClearAll}
+      onClose={() => setShowClearAllConfirm(false)}
+    />
   </div>
   );
 };

@@ -52,7 +52,8 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
       const matchContact = c.contato?.toLowerCase().includes(q);
       const matchBeneficiary = c.beneficiario?.toLowerCase().includes(q);
       const matchReason = c.motivo?.toLowerCase().includes(q);
-      if (!matchContact && !matchBeneficiary && !matchReason) return false;
+      const matchNote = c.observacao?.toLowerCase().includes(q);
+      if (!matchContact && !matchBeneficiary && !matchReason && !matchNote) return false;
     }
     return true;
   });
@@ -98,13 +99,13 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Registration Action Card */}
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex items-center justify-between gap-4 flex-wrap hover:border-black/20 transition-all">
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col items-center gap-4 text-center hover:border-black/20 transition-all">
         <div>
           <h2 className="text-base font-bold text-neutral-900">
             Cadastro e Histórico de Demandas
           </h2>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Registre os chamados atendidos no sobreaviso. Os gráficos analíticos consolidados estão centralizados na aba <b>Visão geral</b>.
+            Registre os chamados atendidos no sobreaviso. Os gráficos analíticos consolidados estão centralizados na aba <b>Dashboard</b>.
           </p>
         </div>
 
@@ -114,15 +115,15 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-semibold bg-[#319685] text-white hover:bg-[#084F42] shadow-md shadow-[#319685]/30 transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>+ Cadastrar Nova Demanda</span>
+          <span>Cadastrar Demanda</span>
         </button>
       </div>
 
       {/* Filter and Search Bar com Rounded Selects */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex items-end gap-3.5 flex-wrap hover:border-black/20 transition-all">
         {/* Search */}
-        <div className="flex flex-col gap-1.5 flex-1 min-w-[220px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+        <div className="flex flex-col gap-1.5 w-full sm:flex-1 sm:min-w-[220px]">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center">
             Buscar por nome / beneficiário
           </label>
           <div className="relative">
@@ -132,14 +133,14 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
               placeholder="Digite o contato, beneficiário ou motivo..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+              className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
             />
           </div>
         </div>
 
         {/* Colaborador */}
-        <div className="flex flex-col gap-1.5 min-w-[190px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+        <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[190px]">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center">
             Colaborador
           </label>
           <CustomSelect
@@ -151,8 +152,8 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
         </div>
 
         {/* Demanda */}
-        <div className="flex flex-col gap-1.5 min-w-[190px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+        <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[190px]">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center">
             Demanda
           </label>
           <CustomSelect
@@ -164,8 +165,8 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
         </div>
 
         {/* Status */}
-        <div className="flex flex-col gap-1.5 min-w-[160px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+        <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[160px]">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center">
             Status
           </label>
           <CustomSelect
@@ -189,7 +190,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
       </div>
 
       {/* Summary Chips */}
-      <div className="flex items-center gap-3 text-xs text-neutral-600 font-medium">
+      <div className="flex items-center justify-center flex-wrap gap-3 text-xs text-neutral-600 font-medium">
         <span className="bg-white px-3.5 py-1.5 rounded-2xl border border-black/10 shadow-2xs">
           Exibindo <b>{totalCalls}</b> demandas
         </span>
@@ -225,7 +226,8 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
                 <th className="py-2.5 px-3">Demanda</th>
                 <th className="py-2.5 px-3">Contato</th>
                 <th className="py-2.5 px-3">Beneficiário</th>
-                <th className="py-2.5 px-3">Motivo / Obs</th>
+                <th className="py-2.5 px-3">Motivo</th>
+                <th className="py-2.5 px-3">Observação</th>
                 <th className="py-2.5 px-3">Início</th>
                 <th className="py-2.5 px-3">Fim</th>
                 <th className="py-2.5 px-3">Duração</th>
@@ -290,6 +292,10 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
 
                       <td className="py-3 px-3 text-neutral-500 truncate max-w-[140px] italic">
                         {call.motivo || '-'}
+                      </td>
+
+                      <td className="py-3 px-3 text-neutral-500 truncate max-w-[140px] italic">
+                        {call.observacao || '-'}
                       </td>
 
                       <td className="py-3 px-3 text-neutral-600 tabular-nums">

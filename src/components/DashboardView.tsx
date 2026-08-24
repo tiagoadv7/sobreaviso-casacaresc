@@ -62,16 +62,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const totalMonthlyHours = schedule.reduce((sum, d) => sum + d.hours, 0);
 
-  // Colaboradora com mais horas
+  // Colaboradora com mais horas — só considera quem já tem alguma hora
+  // registrada no mês; sem isso, o sort sempre "escolhe" o primeiro
+  // colaborador da lista mesmo com o mês inteiro zerado.
   const topCollab = activeCollabs
-    .slice()
+    .filter((c) => (totalsByCollab[c.id] || 0) > 0)
     .sort((a, b) => (totalsByCollab[b.id] || 0) - (totalsByCollab[a.id] || 0))[0];
 
   // Proximo turno
   const now = new Date();
   const isCurrentMonth = now.getFullYear() === currentYear && now.getMonth() === currentMonth;
   const todayDay = isCurrentMonth ? now.getDate() : 1;
-  const upcomingShift = schedule.find((d) => d.day >= todayDay && d.collaboratorId) || schedule[0];
+  // Sem fallback para o primeiro dia do mês: se nenhum dia à frente tem
+  // colaborador escalado, não há "próximo plantão" a mostrar.
+  const upcomingShift = schedule.find((d) => d.day >= todayDay && d.collaboratorId) || null;
   const upcomingCollab = upcomingShift
     ? collaborators.find((c) => c.id === upcomingShift.collaboratorId)
     : null;
@@ -144,21 +148,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <div className="space-y-7">
+      {/* Cadastrar Demanda — no mobile fica no topo, antes de tudo */}
+      <button
+        type="button"
+        onClick={onOpenNewCallModal}
+        className="lg:hidden w-full inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-2xl bg-[#319685] text-white text-sm font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 cursor-pointer transition-all"
+      >
+        <Plus className="w-4 h-4" />
+        <span>Cadastrar Demanda</span>
+      </button>
+
       {/* 5 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* KPI 1 */}
         <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center gap-2">
             <span className="text-xs font-medium text-neutral-500">Horas sobreaviso</span>
-            <div className="w-9 h-9 rounded-2xl bg-[#319685]/15 text-[#084F42] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-2xl bg-[#319685]/15 text-[#084F42] flex items-center justify-center shrink-0">
               <Clock className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
+            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums text-center">
               {fmtHours(totalMonthlyHours)}h
             </div>
-            <div className="text-[11px] text-neutral-400 mt-0.5">
+            <div className="text-[11px] text-neutral-400 mt-0.5 text-center">
               {schedule.length} dias em {monthLabel(currentMonth, currentYear)}
             </div>
           </div>
@@ -166,17 +180,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* KPI 2 */}
         <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center gap-2">
             <span className="text-xs font-medium text-neutral-500">Colaboradores ativos</span>
-            <div className="w-9 h-9 rounded-2xl bg-[#6BC0B2]/20 text-[#084F42] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-2xl bg-[#6BC0B2]/20 text-[#084F42] flex items-center justify-center shrink-0">
               <Users className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
+            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums text-center">
               {activeCollabs.length}
             </div>
-            <div className="text-[11px] text-neutral-400 mt-0.5">
+            <div className="text-[11px] text-neutral-400 mt-0.5 text-center">
               {inactiveCount} em licença
             </div>
           </div>
@@ -184,17 +198,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* KPI 3 */}
         <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center gap-2">
             <span className="text-xs font-medium text-neutral-500">Mais horas no mês</span>
-            <div className="w-9 h-9 rounded-2xl bg-[#EE7870]/20 text-[#E84A4E] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-2xl bg-[#EE7870]/20 text-[#E84A4E] flex items-center justify-center shrink-0">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight truncate">
+            <div className="text-2xl font-bold text-neutral-900 tracking-tight truncate text-center">
               {topCollab?.name || '-'}
             </div>
-            <div className="text-[11px] text-neutral-400 mt-0.5">
+            <div className="text-[11px] text-neutral-400 mt-0.5 text-center">
               {topCollab ? `${fmtHours(totalsByCollab[topCollab.id] || 0)}h no mês` : '-'}
             </div>
           </div>
@@ -202,17 +216,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* KPI 4 */}
         <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center gap-2">
             <span className="text-xs font-medium text-neutral-500">Próximo plantão</span>
-            <div className="w-9 h-9 rounded-2xl bg-[#DEEDE0] text-[#084F42] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-2xl bg-[#DEEDE0] text-[#084F42] flex items-center justify-center shrink-0">
               <Phone className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-xl font-bold text-neutral-900 tracking-tight truncate">
-              {upcomingShift ? `Dia ${upcomingShift.day} · ${upcomingShift.start}` : '-'}
+            <div className="text-xl font-bold text-neutral-900 tracking-tight truncate text-center">
+              {upcomingShift ? `Dia ${upcomingShift.day} · ${upcomingShift.start}` : 'Nenhum agendado'}
             </div>
-            <div className="text-[11px] text-neutral-400 mt-0.5 truncate">
+            <div className="text-[11px] text-neutral-400 mt-0.5 truncate text-center">
               {upcomingCollab?.name || '-'}
             </div>
           </div>
@@ -220,17 +234,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* KPI 5 */}
         <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center gap-2">
             <span className="text-xs font-medium text-neutral-500">Total de Demandas</span>
-            <div className="w-9 h-9 rounded-2xl bg-[#9AD0BE]/25 text-[#084F42] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-2xl bg-[#9AD0BE]/25 text-[#084F42] flex items-center justify-center shrink-0">
               <PhoneCall className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
+            <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums text-center">
               {calls.length}
             </div>
-            <div className="text-[11px] text-neutral-400 mt-0.5">
+            <div className="text-[11px] text-neutral-400 mt-0.5 text-center">
               {completionRate}% concluídas ({completedCallsCount}/{calls.length})
             </div>
           </div>
@@ -239,10 +253,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* SECTION 1: PAINEL ANALÍTICO COMPLETO DE DEMANDAS E ATENDIMENTOS */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-center flex-wrap gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#319685]" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-800">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#319685] shrink-0" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-800 text-center">
               Painel Geral de Demandas e Atendimentos
             </h2>
           </div>
@@ -250,10 +264,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <button
             type="button"
             onClick={onOpenNewCallModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 cursor-pointer transition-all"
+            className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 cursor-pointer transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>+ Cadastrar Demanda</span>
+            <span>Cadastrar Demanda</span>
           </button>
         </div>
 
@@ -261,11 +275,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Gráfico 1: Distribuição por Tipo de Demanda */}
           <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-sm font-bold text-neutral-900">Distribuição por Tipo de Demanda</h3>
-                <BarChart3 className="w-4 h-4 text-neutral-400" />
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <h3 className="text-sm font-bold text-neutral-900 text-center">Distribuição por Tipo de Demanda</h3>
+                <BarChart3 className="w-4 h-4 text-neutral-400 shrink-0" />
               </div>
-              <p className="text-xs text-neutral-400">Quantidade de registros por categoria</p>
+              <p className="text-xs text-neutral-400 text-center">Quantidade de registros por categoria</p>
             </div>
 
             <div className="h-56 w-full my-2">
@@ -280,11 +294,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Gráfico 2: Atendimentos por Colaboradora */}
           <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-sm font-bold text-neutral-900">Atendimentos por Colaboradora</h3>
-                <Users className="w-4 h-4 text-neutral-400" />
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <h3 className="text-sm font-bold text-neutral-900 text-center">Atendimentos por Colaboradora</h3>
+                <Users className="w-4 h-4 text-neutral-400 shrink-0" />
               </div>
-              <p className="text-xs text-neutral-400">Carga de chamados atendidos por pessoa</p>
+              <p className="text-xs text-neutral-400 text-center">Carga de chamados atendidos por pessoa</p>
             </div>
 
             <div className="h-56 w-full my-2">
@@ -308,11 +322,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Gráfico 3: Status dos Atendimentos & Evolução Semanal */}
           <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-sm font-bold text-neutral-900">Status dos Atendimentos</h3>
-                <PieChart className="w-4 h-4 text-neutral-400" />
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <h3 className="text-sm font-bold text-neutral-900 text-center">Status dos Atendimentos</h3>
+                <PieChart className="w-4 h-4 text-neutral-400 shrink-0" />
               </div>
-              <p className="text-xs text-neutral-400">Concluídos vs Pendentes no período</p>
+              <p className="text-xs text-neutral-400 text-center">Concluídos vs Pendentes no período</p>
             </div>
 
             <div className="my-auto py-2 space-y-4">
@@ -375,9 +389,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* SECTION 2: ESCALA E HORAS DE SOBREAVISO */}
       <div className="space-y-4 pt-2">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#084F42]" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-800">
+        <div className="flex items-center justify-center gap-2">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#084F42] shrink-0" />
+          <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-800 text-center">
             Escalas e Horas de Sobreaviso
           </h2>
         </div>
@@ -386,7 +400,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Bar Chart (2 cols) */}
           <div className="lg:col-span-2 bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs hover:border-black/20 transition-all">
-            <div className="mb-4">
+            <div className="mb-4 text-center">
               <h3 className="text-sm font-bold text-neutral-900">Horas de Sobreaviso por Colaboradora</h3>
               <p className="text-xs text-neutral-400">Total acumulado no mês (colaboradoras ativas)</p>
             </div>
@@ -394,11 +408,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="h-64 w-full">
               <SvgBarChart activeCollabs={activeCollabs} totalsByCollab={totalsByCollab} />
             </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2.5 mt-1 border-t border-black/5">
+              {activeCollabs.map((c) => (
+                <span
+                  key={c.id}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-neutral-100/80"
+                  style={{ color: c.color }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
+                  {c.name}: {fmtHours(totalsByCollab[c.id] || 0)}h
+                </span>
+              ))}
+            </div>
           </div>
 
           {/* Donut Chart (1 col) */}
           <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
-            <div>
+            <div className="text-center">
               <h3 className="text-sm font-bold text-neutral-900">Distribuição por Tipo de Turno</h3>
               <p className="text-xs text-neutral-400">Semana, fim de semana e apoio</p>
             </div>
@@ -428,7 +455,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Stacked Bar (2 cols) */}
           <div className="lg:col-span-2 bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs hover:border-black/20 transition-all">
-            <div className="mb-4">
+            <div className="mb-4 text-center">
               <h3 className="text-sm font-bold text-neutral-900">Evolução Semanal de Horas</h3>
               <p className="text-xs text-neutral-400">Horas de sobreaviso por semana e colaboradora</p>
             </div>
@@ -437,15 +464,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <SvgStackedWeeksChart weeks={weeksSummary} activeCollabs={activeCollabs} />
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 mt-4 pt-3.5 border-t border-black/5">
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-4 pt-3.5 border-t border-black/5">
               {activeCollabs.map((c) => (
                 <span
                   key={c.id}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
-                  style={{ backgroundColor: `${c.color}15`, color: c.color }}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-neutral-100/80"
+                  style={{ color: c.color }}
                 >
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
-                  {c.name}
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
+                  {c.name}: {fmtHours(totalsByCollab[c.id] || 0)}h
                 </span>
               ))}
             </div>
@@ -453,7 +480,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           {/* Plantões no mês (1 col) */}
           <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col hover:border-black/20 transition-all">
-            <div className="mb-3">
+            <div className="mb-3 text-center">
               <h3 className="text-sm font-bold text-neutral-900">Plantões no Mês</h3>
               <p className="text-xs text-neutral-400">Quantidade de turnos atribuídos</p>
             </div>
@@ -483,13 +510,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* SECTION 3: TABELA DE ÚLTIMAS DEMANDAS */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs overflow-x-auto hover:border-black/20 transition-all">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col items-center gap-3 text-center mb-4">
           <div>
             <h3 className="text-sm font-bold text-neutral-900">Últimas Demandas Registradas</h3>
             <p className="text-xs text-neutral-400">Histórico recente de solicitações atendidas</p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center flex-wrap justify-center gap-3">
             <button
               type="button"
               onClick={onOpenNewCallModal}
@@ -605,7 +632,10 @@ const SvgBarChart: React.FC<{
   const W = 640;
   const H = 240;
   const padL = 40;
-  const padB = 30;
+  // Sem rótulo de nome sob a barra — mesmo problema do gráfico de
+  // atendimentos: com várias colaboradoras o texto colide. Os nomes já
+  // aparecem coloridos na legenda abaixo do gráfico.
+  const padB = 10;
   const padT = 15;
   const padR = 15;
   const innerW = W - padL - padR;
@@ -652,16 +682,6 @@ const SvgBarChart: React.FC<{
             >
               <title>{`${c.name}: ${fmtHours(v)}h`}</title>
             </rect>
-            <text
-              x={x + barW / 2}
-              y={padT + innerH + 18}
-              fontSize="12"
-              fontWeight="500"
-              fill="#52514e"
-              textAnchor="middle"
-            >
-              {c.name}
-            </text>
           </g>
         );
       })}
@@ -676,7 +696,10 @@ const SvgCollabCallsChart: React.FC<{
   const W = 320;
   const H = 200;
   const padL = 30;
-  const padB = 30;
+  // Sem rótulo de nome sob a barra — com vários colaboradores o texto
+  // colide (nomes longos, pouco espaço); os nomes já aparecem coloridos
+  // na legenda abaixo do gráfico.
+  const padB = 10;
   const padT = 15;
   const padR = 10;
   const innerW = W - padL - padR;
@@ -724,16 +747,6 @@ const SvgCollabCallsChart: React.FC<{
             >
               <title>{`${c.name}: ${v} chamados`}</title>
             </rect>
-            <text
-              x={x + barW / 2}
-              y={padT + innerH + 16}
-              fontSize="10"
-              fontWeight="500"
-              fill="#52514e"
-              textAnchor="middle"
-            >
-              {c.name}
-            </text>
           </g>
         );
       })}

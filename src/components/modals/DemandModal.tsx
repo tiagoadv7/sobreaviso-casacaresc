@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Collaborator, DemandType, CallRecord, CallStatus } from '../../types';
+import { Collaborator, DemandType, CallRecord, CallStatus, DaySchedule } from '../../types';
 import { PALETTE, EXTRA_COLORS, WEEKDAY_LABELS } from '../../utils/constants';
-import { pad } from '../../utils/calc';
-import { X, ChevronDown, Tag, Clock, Calendar, User, CheckCircle2, AlertCircle } from 'lucide-react';
+import { collaboratorStatusLabel, pad } from '../../utils/calc';
+import { X, ChevronDown, Tag, Calendar, User, CheckCircle2, AlertCircle } from 'lucide-react';
 import { CustomSelect, SelectOption } from '../CustomSelect';
+import { TimeSelect } from '../TimeSelect';
 
 interface DemandModalProps {
   isOpen: boolean;
@@ -12,11 +13,14 @@ interface DemandModalProps {
   presetCollabId?: string;
   collaborators: Collaborator[];
   demandTypes: DemandType[];
+  schedule: DaySchedule[];
+  isAdmin: boolean;
+  ownCollaboratorId?: string;
   currentYear: number;
   currentMonth: number;
   onClose: () => void;
   onSaveCall: (callData: Omit<CallRecord, 'id'>, existingId?: string) => void;
-  onAddNewDemandType: (label: string, color: string) => string;
+  onAddNewDemandType: (label: string, color: string) => Promise<string>;
 }
 
 export const DemandModal: React.FC<DemandModalProps> = ({
@@ -26,6 +30,9 @@ export const DemandModal: React.FC<DemandModalProps> = ({
   presetCollabId,
   collaborators,
   demandTypes,
+  schedule,
+  isAdmin,
+  ownCollaboratorId,
   currentYear,
   currentMonth,
   onClose,
@@ -38,6 +45,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
   const [contato, setContato] = useState<string>('');
   const [beneficiario, setBeneficiario] = useState<string>('');
   const [motivo, setMotivo] = useState<string>('');
+  const [observacao, setObservacao] = useState<string>('');
   const [inicio, setInicio] = useState<string>('');
   const [fim, setFim] = useState<string>('');
   const [status, setStatus] = useState<CallStatus>('pendente');
@@ -50,6 +58,22 @@ export const DemandModal: React.FC<DemandModalProps> = ({
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
+  // Dia atual do calendário como padrão ao abrir para um novo registro
+  // (só faz sentido quando o mês/ano em exibição é o mês/ano corrente).
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonth;
+  const todayAsDefaultDay = isCurrentMonth ? today.getDate() : 1;
+
+  // Colaborador (não admin) só registra demanda em dias/como o colaborador
+  // que o administrador escalou no calendário. Não se aplica a admin, nem a
+  // edição de um chamado já existente.
+  const isRestricted = !isAdmin && !editingCall;
+  const daysScheduledForOwnCollaborator = new Set(
+    schedule.filter((d) => d.collaboratorId === ownCollaboratorId).map((d) => d.day)
+  );
+  const noScheduledDays = isRestricted && daysScheduledForOwnCollaborator.size === 0;
+  const missingCollaboratorLink = isRestricted && !ownCollaboratorId;
+
   useEffect(() => {
     if (editingCall) {
       setDay(editingCall.day);
@@ -58,16 +82,36 @@ export const DemandModal: React.FC<DemandModalProps> = ({
       setContato(editingCall.contato || '');
       setBeneficiario(editingCall.beneficiario || '');
       setMotivo(editingCall.motivo || '');
+      setObservacao(editingCall.observacao || '');
       setInicio(editingCall.inicio || '');
       setFim(editingCall.fim || '');
       setStatus(editingCall.status);
+    } else if (isRestricted) {
+      const scheduledDays = Array.from(daysScheduledForOwnCollaborator).sort((a, b) => a - b);
+      const initialDay =
+        presetDay && daysScheduledForOwnCollaborator.has(presetDay)
+          ? presetDay
+          : scheduledDays.includes(todayAsDefaultDay)
+          ? todayAsDefaultDay
+          : scheduledDays[0] ?? todayAsDefaultDay;
+      setDay(initialDay);
+      setCollaboratorId(ownCollaboratorId || '');
+      setDemandTypeId(demandTypes[0]?.id || '');
+      setContato('');
+      setBeneficiario('');
+      setMotivo('');
+      setObservacao('');
+      setInicio('19:00');
+      setFim('19:30');
+      setStatus('pendente');
     } else {
-      setDay(presetDay || 1);
+      setDay(presetDay || todayAsDefaultDay);
       setCollaboratorId(presetCollabId || (collaborators[0]?.id || ''));
       setDemandTypeId(demandTypes[0]?.id || '');
       setContato('');
       setBeneficiario('');
       setMotivo('');
+      setObservacao('');
       setInicio('19:00');
       setFim('19:30');
       setStatus('pendente');
@@ -80,21 +124,25 @@ export const DemandModal: React.FC<DemandModalProps> = ({
 
   const currentDemand = demandTypes.find((d) => d.id === demandTypeId);
 
-  const dayOptions: SelectOption[] = Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
-    const dateObj = new Date(currentYear, currentMonth, d);
-    const wd = WEEKDAY_LABELS[dateObj.getDay()];
-    return {
-      value: d.toString(),
-      label: `${pad(d)}/${pad(currentMonth + 1)} · ${wd}`,
-      icon: <Calendar className="w-3.5 h-3.5 text-neutral-400" />,
-    };
-  });
+  const dayOptions: SelectOption[] = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+    .filter((d) => !isRestricted || daysScheduledForOwnCollaborator.has(d))
+    .map((d) => {
+      const dateObj = new Date(currentYear, currentMonth, d);
+      const wd = WEEKDAY_LABELS[dateObj.getDay()];
+      return {
+        value: d.toString(),
+        label: `${pad(d)}/${pad(currentMonth + 1)} · ${wd}`,
+        icon: <Calendar className="w-3.5 h-3.5 text-neutral-400" />,
+      };
+    });
 
-  const collaboratorOptions: SelectOption[] = collaborators.map((c) => ({
+  const collaboratorOptions: SelectOption[] = (
+    isRestricted ? collaborators.filter((c) => c.id === ownCollaboratorId) : collaborators
+  ).map((c) => ({
     value: c.id,
     label: c.name,
     color: c.color,
-    badge: c.status === 'licenca' ? 'Em licença' : undefined,
+    badge: c.status !== 'ativo' ? collaboratorStatusLabel(c) : undefined,
     icon: <User className="w-3.5 h-3.5 text-neutral-400" />,
   }));
 
@@ -113,9 +161,9 @@ export const DemandModal: React.FC<DemandModalProps> = ({
     },
   ];
 
-  const handleCreateDemandType = () => {
+  const handleCreateDemandType = async () => {
     if (!newDemandLabel.trim()) return;
-    const newId = onAddNewDemandType(newDemandLabel.trim(), newDemandColor);
+    const newId = await onAddNewDemandType(newDemandLabel.trim(), newDemandColor);
     setDemandTypeId(newId);
     setNewDemandLabel('');
     setIsDemandPickerOpen(false);
@@ -127,6 +175,10 @@ export const DemandModal: React.FC<DemandModalProps> = ({
       setErrorText('Por favor, selecione o dia, colaborador e tipo de demanda.');
       return;
     }
+    if (isRestricted && !daysScheduledForOwnCollaborator.has(day)) {
+      setErrorText('Você só pode registrar demandas em dias com plantão liberado pelo administrador.');
+      return;
+    }
 
     onSaveCall(
       {
@@ -136,6 +188,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
         contato: contato.trim(),
         beneficiario: beneficiario.trim(),
         motivo: motivo.trim(),
+        observacao: observacao.trim(),
         inicio,
         fim,
         status,
@@ -151,20 +204,18 @@ export const DemandModal: React.FC<DemandModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl w-full max-w-lg p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-base font-bold text-neutral-900">
-              {editingCall ? 'Editar demanda' : 'Novo registro de demanda'}
-            </h3>
-            <p className="text-xs text-neutral-400 font-medium mt-0.5">
-              Registre o dia, colaborador e tipo de demanda atendida durante o sobreaviso.
-            </p>
-          </div>
+        <div className="relative text-center">
+          <h3 className="text-base font-bold text-neutral-900">
+            {editingCall ? 'Editar demanda' : 'Novo registro de demanda'}
+          </h3>
+          <p className="text-xs text-neutral-400 font-medium mt-0.5">
+            Registre o dia, colaborador e tipo de demanda atendida durante o sobreaviso.
+          </p>
 
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+            className="absolute right-0 top-0 p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -176,11 +227,23 @@ export const DemandModal: React.FC<DemandModalProps> = ({
           </div>
         )}
 
+        {missingCollaboratorLink && (
+          <div className="text-xs text-amber-700 bg-amber-50 p-3 rounded-2xl border border-amber-200">
+            Sua conta não está vinculada a nenhum colaborador. Fale com o administrador para registrar demandas.
+          </div>
+        )}
+
+        {!missingCollaboratorLink && noScheduledDays && (
+          <div className="text-xs text-amber-700 bg-amber-50 p-3 rounded-2xl border border-amber-200">
+            Você não tem nenhum plantão liberado neste mês. Só é possível registrar uma demanda em um dia com plantão atribuído pelo administrador.
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Dia & Colaborador com Rounded Custom Selects */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Dia do mês *
               </label>
               <CustomSelect
@@ -192,13 +255,14 @@ export const DemandModal: React.FC<DemandModalProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Colaborador *
               </label>
               <CustomSelect
                 options={collaboratorOptions}
                 value={collaboratorId}
                 onChange={(val) => setCollaboratorId(val)}
+                disabled={isRestricted}
                 placeholder="Selecione a colaboradora"
               />
             </div>
@@ -206,14 +270,14 @@ export const DemandModal: React.FC<DemandModalProps> = ({
 
           {/* Demanda Custom Dropdown com Rounded Popover */}
           <div className="space-y-1.5 relative">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Tipo de demanda *
             </label>
 
             <button
               type="button"
               onClick={() => setIsDemandPickerOpen(!isDemandPickerOpen)}
-              className="w-full px-3.5 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 flex items-center justify-between hover:border-black/20 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 cursor-pointer shadow-2xs"
+              className="relative w-full pl-8 pr-8 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 flex items-center justify-center hover:border-black/20 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 cursor-pointer shadow-2xs"
             >
               {currentDemand ? (
                 <span
@@ -225,7 +289,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
               ) : (
                 <span className="text-neutral-400">Selecionar demanda</span>
               )}
-              <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
+              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
             </button>
 
             {/* Dropdown Panel com Rounded 2xl */}
@@ -303,7 +367,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
           {/* Contato & Beneficiário */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Contato / Solicitante
               </label>
               <input
@@ -311,12 +375,12 @@ export const DemandModal: React.FC<DemandModalProps> = ({
                 placeholder="Ex: Márcia Souza"
                 value={contato}
                 onChange={(e) => setContato(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Beneficiário / Paciente
               </label>
               <input
@@ -324,14 +388,14 @@ export const DemandModal: React.FC<DemandModalProps> = ({
                 placeholder="Ex: João Pedro Alves"
                 value={beneficiario}
                 onChange={(e) => setBeneficiario(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
               />
             </div>
           </div>
 
           {/* Motivo de transferência */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Motivo de transferência (opcional)
             </label>
             <input
@@ -339,44 +403,44 @@ export const DemandModal: React.FC<DemandModalProps> = ({
               placeholder="Ex: Encaminhamento hospitalar"
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+            />
+          </div>
+
+          {/* Observação */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
+              Observação (opcional)
+            </label>
+            <textarea
+              placeholder="Detalhes adicionais sobre o atendimento..."
+              value={observacao}
+              onChange={(e) => setObservacao(e.target.value)}
+              rows={2}
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs resize-none"
             />
           </div>
 
           {/* Horários */}
           <div className="grid grid-cols-2 gap-3.5">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Hora inicial
               </label>
-              <div className="relative">
-                <input
-                  type="time"
-                  value={inicio}
-                  onChange={(e) => setInicio(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
-                />
-              </div>
+              <TimeSelect value={inicio} onChange={setInicio} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Hora final
               </label>
-              <div className="relative">
-                <input
-                  type="time"
-                  value={fim}
-                  onChange={(e) => setFim(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
-                />
-              </div>
+              <TimeSelect value={fim} onChange={setFim} />
             </div>
           </div>
 
           {/* Status com Custom Select */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Conclusão / Status
             </label>
             <CustomSelect
@@ -398,7 +462,8 @@ export const DemandModal: React.FC<DemandModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 transition-all cursor-pointer"
+              disabled={noScheduledDays || missingCollaboratorLink}
+              className="px-5 py-2 rounded-2xl bg-[#319685] text-white text-xs font-semibold hover:bg-[#084F42] shadow-md shadow-[#319685]/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Salvar demanda
             </button>

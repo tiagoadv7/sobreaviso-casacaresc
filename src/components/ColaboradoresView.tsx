@@ -1,6 +1,6 @@
 import React from 'react';
 import { Collaborator, DaySchedule } from '../types';
-import { fmtHours, getInitials } from '../utils/calc';
+import { collaboratorStatusLabel, fmtHours, getInitials } from '../utils/calc';
 import { Phone, Pencil, Trash2, UserPlus, AlertCircle } from 'lucide-react';
 
 interface ColaboradoresViewProps {
@@ -37,7 +37,7 @@ export const ColaboradoresView: React.FC<ColaboradoresViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Banner / Add card */}
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex items-center justify-between gap-4 flex-wrap hover:border-black/20 transition-all">
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col items-center gap-4 text-center hover:border-black/20 transition-all">
         <div>
           <h2 className="text-base font-bold text-neutral-900">
             Equipe de Sobreaviso
@@ -53,7 +53,7 @@ export const ColaboradoresView: React.FC<ColaboradoresViewProps> = ({
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-semibold bg-[#319685] text-white hover:bg-[#084F42] shadow-md shadow-[#319685]/30 transition-all cursor-pointer"
         >
           <UserPlus className="w-4 h-4" />
-          <span>+ Cadastrar Colaborador</span>
+          <span>Cadastrar Colaborador</span>
         </button>
       </div>
 
@@ -89,7 +89,7 @@ export const ColaboradoresView: React.FC<ColaboradoresViewProps> = ({
                             : 'bg-neutral-100 text-neutral-500'
                         }`}
                       >
-                        {c.status === 'ativo' ? 'Ativo' : 'Licença'}
+                        {collaboratorStatusLabel(c)}
                       </span>
                     </div>
 

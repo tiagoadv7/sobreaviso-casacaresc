@@ -108,11 +108,11 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-semibold text-neutral-900 transition-all text-left shadow-2xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#319685]/30 ${
+        className={`relative w-full flex items-center justify-center gap-2 pl-8 pr-8 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-semibold text-neutral-900 transition-all shadow-2xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#319685]/30 ${
           isOpen ? 'ring-2 ring-[#319685] border-transparent' : 'hover:border-black/20'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${buttonClassName}`}
       >
-        <div className="flex items-center gap-2 truncate min-w-0">
+        <div className="flex items-center justify-center gap-2 truncate min-w-0">
           {selectedOption?.color && (
             <span
               className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -133,7 +133,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         </div>
 
         <ChevronDown
-          className={`w-4 h-4 text-neutral-400 shrink-0 transition-transform duration-200 ${
+          className={`absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 shrink-0 transition-transform duration-200 ${
             isOpen ? 'rotate-180 text-[#319685]' : ''
           }`}
         />

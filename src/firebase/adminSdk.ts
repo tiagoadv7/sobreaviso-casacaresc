@@ -24,7 +24,12 @@ import { SystemUser, UserRole } from '../types';
 export async function adminCreateUser(
   email: string,
   password: string,
-  profile: { displayName: string; role: UserRole; collaboratorId?: string }
+  profile: {
+    displayName: string;
+    role: UserRole;
+    collaboratorId?: string;
+    mustChangePassword?: boolean;
+  }
 ): Promise<string> {
   // Instância secundária com nome único para não conflitar
   const secondaryAppName = `admin-create-${Date.now()}`;
@@ -35,7 +40,9 @@ export async function adminCreateUser(
     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
     const uid = cred.user.uid;
 
-    // Salva perfil no Firestore
+    // Salva perfil no Firestore — mustChangePassword força a pessoa a trocar
+    // a senha temporária definida pelo admin no primeiro acesso dela. O
+    // admin decide isso na tela de criação (marcado por padrão).
     const userProfile: SystemUser = {
       uid,
       email,
@@ -44,6 +51,7 @@ export async function adminCreateUser(
       collaboratorId: profile.collaboratorId,
       disabled: false,
       createdAt: new Date().toISOString(),
+      mustChangePassword: profile.mustChangePassword ?? true,
     };
     await saveUserProfile(uid, userProfile);
 
@@ -61,16 +69,22 @@ export async function adminCreateUser(
 
 /**
  * Envia email de redefinição de senha para o usuário.
- * O link aponta para o próprio domínio em que o app está rodando (ex: a URL
- * da Vercel em produção, ou localhost em desenvolvimento) para que a troca
- * de senha aconteça na tela do próprio sistema, não na página genérica do
- * Firebase. Esse domínio precisa estar em Firebase Console → Authentication
- * → Settings → Authorized domains.
+ * `url` é a "continue URL" para onde o Firebase manda o usuário depois de
+ * concluir a troca de senha. `handleCodeInApp` é só para apps mobile — em
+ * apps web deve ficar false, senão o Firebase pode não processar o link
+ * corretamente.
+ *
+ * Para o e-mail linkar DIRETO na tela do próprio sistema (em vez da página
+ * genérica do Firebase), é preciso configurar em Firebase Console →
+ * Authentication → Templates → "Redefinição de senha" → editar →
+ * "Personalizar URL de ação", apontando para o domínio de produção (ex:
+ * https://sobreaviso-casacaresc.vercel.app). Esse domínio também precisa
+ * estar em Authentication → Settings → Authorized domains.
  */
 export async function adminSendPasswordReset(email: string): Promise<void> {
   const { auth } = await import('./config');
   await fbSendReset(auth, email, {
     url: window.location.origin,
-    handleCodeInApp: true,
+    handleCodeInApp: false,
   });
 }

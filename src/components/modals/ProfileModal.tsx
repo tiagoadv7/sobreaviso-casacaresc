@@ -229,7 +229,11 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               />
             </div>
 
-            {collaborator && (
+            {/* Colaborador só pode alterar nome e senha — os demais campos
+                do cadastro (contato, observação, função, matrícula, cor,
+                status) só ficam visíveis/editáveis pelo administrador,
+                através da tela de Colaboradores. */}
+            {collaborator && isAdmin && (
               <>
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
