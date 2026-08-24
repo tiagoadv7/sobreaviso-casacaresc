@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Check, Trash2, AlertCircle } from 'lucide-react';
 import {
   Collaborator,
   DemandType,
@@ -141,9 +142,11 @@ function AppInner() {
 
   // Toast feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'success' | 'delete' | 'error'>('success');
 
-  const showToast = (msg: string) => {
+  const showToast = (msg: string, type: 'success' | 'delete' | 'error' = 'success') => {
     setToastMessage(msg);
+    setToastType(type);
     setTimeout(() => {
       setToastMessage((prev) => (prev === msg ? null : prev));
     }, 2400);
@@ -218,7 +221,7 @@ function AppInner() {
   const handleClearDay = async () => {
     if (!selectedDaySchedule) return;
     await deleteScheduleOverride(selectedDaySchedule.date);
-    showToast('Plantão removido do dia.');
+    showToast('Plantão removido do dia.', 'delete');
   };
 
   const handleOpenNewCallForDay = (day: number, collaboratorId: string) => {
@@ -273,10 +276,10 @@ function AppInner() {
     setIsDeletingCall(true);
     try {
       await dbDeleteCall(callPendingDelete.id);
-      showToast('Demanda excluída.');
+      showToast('Demanda excluída.', 'delete');
       setCallPendingDelete(null);
     } catch {
-      showToast('Erro ao excluir demanda.');
+      showToast('Erro ao excluir demanda.', 'error');
     } finally {
       setIsDeletingCall(false);
     }
@@ -324,10 +327,10 @@ function AppInner() {
     setIsDeletingCollab(true);
     try {
       await dbDeleteCollaborator(collabPendingDelete.id);
-      showToast('Colaborador excluído.');
+      showToast('Colaborador excluído.', 'delete');
       setCollabPendingDelete(null);
     } catch {
-      showToast('Erro ao excluir colaborador.');
+      showToast('Erro ao excluir colaborador.', 'error');
     } finally {
       setIsDeletingCollab(false);
     }
@@ -615,7 +618,26 @@ function AppInner() {
       />
 
       {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-neutral-900 text-white px-5 py-2.5 rounded-full text-xs font-semibold shadow-xl animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[1100] flex items-center gap-2.5 pl-2.5 pr-4 py-2 rounded-2xl text-xs font-semibold text-white shadow-xl animate-in fade-in slide-in-from-bottom-3 duration-200 ${
+            toastType === 'success'
+              ? 'bg-[#319685] shadow-[#319685]/30'
+              : 'bg-[#E84A4E] shadow-[#E84A4E]/30'
+          }`}
+        >
+          <div
+            className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 bg-white ${
+              toastType === 'success' ? 'text-[#319685]' : 'text-[#E84A4E]'
+            }`}
+          >
+            {toastType === 'success' ? (
+              <Check className="w-3 h-3" strokeWidth={3} />
+            ) : toastType === 'delete' ? (
+              <Trash2 className="w-3 h-3" strokeWidth={2.5} />
+            ) : (
+              <AlertCircle className="w-3 h-3" strokeWidth={2.5} />
+            )}
+          </div>
           {toastMessage}
         </div>
       )}

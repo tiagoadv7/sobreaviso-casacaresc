@@ -97,14 +97,22 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
     };
   });
 
+  // Totais do mês por colaboradora — usados na legenda centralizada abaixo dos gráficos
+  const hoursByCollabTotal: Record<string, number> = {};
+  const callsByCollabTotal: Record<string, number> = {};
+  activeCollabs.forEach((c) => {
+    hoursByCollabTotal[c.id] = weeklyHours.reduce((sum, w) => sum + (w.totals[c.id] || 0), 0);
+    callsByCollabTotal[c.id] = weeklyCalls.reduce((sum, w) => sum + (w.counts[c.id] || 0), 0);
+  });
+
   return (
     <div className="space-y-6">
       {/* Month Navigator Toolbar + Legend */}
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs space-y-4 hover:border-black/20 transition-all">
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xs space-y-3 sm:space-y-4 hover:border-black/20 transition-all">
         {/* Navegação de mês — mesmo comportamento em mobile e desktop: o
             "pill" com mês/ano abre o seletor completo (MonthYearPickerModal)
             em vez de dropdowns separados de mês e ano. */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center justify-center lg:justify-between gap-3 flex-wrap">
           <div className="flex flex-col items-center gap-1.5">
             {/* Uma única cápsula arredondada — setas e mês/ano no mesmo
                 bloco, sem espaço entre eles. */}
@@ -165,14 +173,14 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-black/5">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pt-2.5 sm:pt-3 border-t border-black/5">
           {collaborators.map((c) => (
             <span
               key={c.id}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+              className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-semibold"
               style={{ backgroundColor: `${c.color}15`, color: c.color }}
             >
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
               {c.name}
               {c.status !== 'ativo' && (
                 <span className="text-[10px] opacity-70 font-normal">
@@ -185,24 +193,22 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs hover:border-black/20 transition-all overflow-x-auto">
-        <div className="min-w-[640px]">
-        {/* Days of week header */}
-        <div className="grid grid-cols-7 gap-3 text-center text-xs font-bold text-neutral-400 mb-3">
-          <div className="py-1">Segunda</div>
-          <div className="py-1">Terça</div>
-          <div className="py-1">Quarta</div>
-          <div className="py-1">Quinta</div>
-          <div className="py-1">Sexta</div>
-          <div className="py-1">Sábado</div>
-          <div className="py-1">Domingo</div>
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-2xl sm:rounded-3xl p-2.5 sm:p-6 shadow-xs hover:border-black/20 transition-all">
+        {/* Days of week header — abreviado no mobile para caber sem scroll lateral */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-3 text-center text-[10px] sm:text-xs font-bold text-neutral-400 mb-1.5 sm:mb-3">
+          {['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'].map((label) => (
+            <div key={label} className="py-1">
+              <span className="sm:hidden">{label.slice(0, 3)}</span>
+              <span className="hidden sm:inline">{label}</span>
+            </div>
+          ))}
         </div>
 
         {/* Calendar cells */}
-        <div className="grid grid-cols-7 gap-3">
+        <div className="grid grid-cols-7 gap-1 sm:gap-3">
           {calendarCells.map((dayItem, idx) => {
             if (!dayItem) {
-              return <div key={`blank-${idx}`} className="min-h-[92px] rounded-2xl bg-transparent" />;
+              return <div key={`blank-${idx}`} className="min-h-[58px] sm:min-h-[92px] rounded-xl sm:rounded-2xl bg-transparent" />;
             }
 
             const collab = collaborators.find((c) => c.id === dayItem.collaboratorId);
@@ -213,25 +219,25 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
                 key={dayItem.date}
                 type="button"
                 onClick={() => onOpenDayModal(dayItem)}
-                className={`min-h-[92px] rounded-2xl border p-3 flex flex-col justify-between text-left transition-all hover:bg-neutral-50 hover:-translate-y-0.5 cursor-pointer shadow-2xs ${
+                className={`min-h-[58px] sm:min-h-[92px] rounded-xl sm:rounded-2xl border p-1 sm:p-3 flex flex-col justify-between text-left transition-all hover:bg-neutral-50 hover:-translate-y-0.5 cursor-pointer shadow-2xs overflow-hidden ${
                   dayItem.isCustom
                     ? 'border-[#319685]/40 bg-[#DEEDE0]/30 ring-1 ring-[#319685]/25'
                     : 'border-black/10 bg-[#fcfcfb]'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-neutral-800 tabular-nums">
+                  <span className="text-[10px] sm:text-xs font-bold text-neutral-800 tabular-nums">
                     {dayItem.day}
                   </span>
                   {dayItem.isCustom && (
-                    <span className="w-2 h-2 rounded-full bg-[#319685]" title="Horário personalizado" />
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#319685]" title="Horário personalizado" />
                   )}
                 </div>
 
-                <div className="my-1.5 space-y-1">
+                <div className="my-0.5 sm:my-1.5 space-y-1">
                   {collab && (
                     <span
-                      className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold truncate max-w-full"
+                      className="inline-block px-1 sm:px-2.5 py-0.5 rounded-full text-[8px] sm:text-[11px] font-bold truncate max-w-full"
                       style={{ backgroundColor: `${collab.color}18`, color: collab.color }}
                     >
                       {collab.name}
@@ -239,14 +245,14 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] font-medium mt-auto pt-1 border-t border-black/5">
-                  <span className="text-neutral-400 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-neutral-300" />
+                <div className="flex items-center justify-between text-[8px] sm:text-[11px] font-medium mt-auto pt-1 border-t border-black/5 gap-0.5">
+                  <span className="text-neutral-400 flex items-center gap-0.5 sm:gap-1 truncate">
+                    <Clock className="hidden sm:block w-3 h-3 text-neutral-300 shrink-0" />
                     {fmtHours(dayItem.hours)}h
                   </span>
                   {dayCalls.length > 0 && (
-                    <span className="font-bold text-[#084F42] bg-[#319685]/15 px-1.5 py-0.5 rounded-md">
-                      {dayCalls.length} atend.
+                    <span className="font-bold text-[#084F42] bg-[#319685]/15 px-1 sm:px-1.5 py-0.5 rounded-md shrink-0">
+                      {dayCalls.length}<span className="hidden sm:inline"> atend.</span>
                     </span>
                   )}
                 </div>
@@ -254,77 +260,63 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
             );
           })}
         </div>
-        </div>
       </div>
 
-      {/* Resumo semanal de horas Table */}
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs overflow-x-auto hover:border-black/20 transition-all">
-        <div className="mb-4">
+      {/* Resumo semanal de horas */}
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xs hover:border-black/20 transition-all">
+        <div className="mb-3 sm:mb-4">
           <h2 className="text-sm font-bold text-neutral-900">Resumo semanal de horas</h2>
           <p className="text-xs text-neutral-400">Soma de horas por semana e colaboradora ativa</p>
         </div>
 
-        <table className="w-full text-xs text-left">
-          <thead>
-            <tr className="border-b border-black/10 text-neutral-400 text-[11px] font-semibold">
-              <th className="py-2.5 px-3">Semana</th>
-              {activeCollabs.map((c) => (
-                <th key={c.id} className="py-2.5 px-3">
-                  {c.name}
-                </th>
-              ))}
-              <th className="py-2.5 px-3 font-bold text-neutral-700">Total</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-black/5 tabular-nums">
-            {weeklyHours.map((w) => (
-              <tr key={w.weekIndex} className="hover:bg-neutral-50/60 transition-colors">
-                <td className="py-2.5 px-3 font-bold text-neutral-800">{w.label}</td>
-                {activeCollabs.map((c) => (
-                  <td key={c.id} className="py-2.5 px-3 text-neutral-600">
-                    {fmtHours(w.totals[c.id] || 0)}h
-                  </td>
-                ))}
-                <td className="py-2.5 px-3 font-bold text-neutral-900">{fmtHours(w.total)}h</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="h-52 sm:h-64 w-full">
+          <SvgWeeklyBarChart
+            weeks={weeklyHours.map((w) => ({ weekIndex: w.weekIndex, values: w.totals, total: w.total }))}
+            activeCollabs={activeCollabs}
+            unit="h"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-2.5 mt-1 sm:mt-2 border-t border-black/5">
+          {activeCollabs.map((c) => (
+            <span
+              key={c.id}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-neutral-100/80"
+              style={{ color: c.color }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
+              {c.name}: {fmtHours(hoursByCollabTotal[c.id] || 0)}h
+            </span>
+          ))}
+        </div>
       </div>
 
-      {/* Atendimentos por semana Table */}
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs overflow-x-auto hover:border-black/20 transition-all">
-        <div className="mb-4">
+      {/* Atendimentos por semana */}
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xs hover:border-black/20 transition-all">
+        <div className="mb-3 sm:mb-4">
           <h2 className="text-sm font-bold text-neutral-900">Atendimentos por semana</h2>
           <p className="text-xs text-neutral-400">Quantidade de demandas registradas por semana e colaboradora</p>
         </div>
 
-        <table className="w-full text-xs text-left">
-          <thead>
-            <tr className="border-b border-black/10 text-neutral-400 text-[11px] font-semibold">
-              <th className="py-2.5 px-3">Semana</th>
-              {activeCollabs.map((c) => (
-                <th key={c.id} className="py-2.5 px-3">
-                  {c.name}
-                </th>
-              ))}
-              <th className="py-2.5 px-3 font-bold text-neutral-700">Total</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-black/5 tabular-nums">
-            {weeklyCalls.map((w) => (
-              <tr key={w.weekIndex} className="hover:bg-neutral-50/60 transition-colors">
-                <td className="py-2.5 px-3 font-bold text-neutral-800">{w.label}</td>
-                {activeCollabs.map((c) => (
-                  <td key={c.id} className="py-2.5 px-3 text-neutral-600">
-                    {w.counts[c.id] || 0}
-                  </td>
-                ))}
-                <td className="py-2.5 px-3 font-bold text-neutral-900">{w.total}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="h-52 sm:h-64 w-full">
+          <SvgWeeklyBarChart
+            weeks={weeklyCalls.map((w) => ({ weekIndex: w.weekIndex, values: w.counts, total: w.total }))}
+            activeCollabs={activeCollabs}
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-2.5 mt-1 sm:mt-2 border-t border-black/5">
+          {activeCollabs.map((c) => (
+            <span
+              key={c.id}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-neutral-100/80"
+              style={{ color: c.color }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
+              {c.name}: {callsByCollabTotal[c.id] || 0}
+            </span>
+          ))}
+        </div>
       </div>
 
       <MonthYearPickerModal
@@ -338,5 +330,86 @@ export const EscalaView: React.FC<EscalaViewProps> = ({
         }}
       />
     </div>
+  );
+};
+
+// Gráfico de barras empilhadas por semana (uma barra por semana, segmentos
+// coloridos por colaboradora) — mesmo estilo visual dos gráficos do Dashboard.
+const SvgWeeklyBarChart: React.FC<{
+  weeks: { weekIndex: number; values: Record<string, number>; total: number }[];
+  activeCollabs: Collaborator[];
+  unit?: string;
+}> = ({ weeks, activeCollabs, unit = '' }) => {
+  const W = 640;
+  const H = 240;
+  const padL = 34;
+  const padB = 26;
+  const padT = 15;
+  const padR = 10;
+  const innerW = W - padL - padR;
+  const innerH = H - padT - padB;
+
+  const maxTotal = Math.max(4, Math.ceil((Math.max(...weeks.map((w) => w.total), 4) * 1.1) / 4) * 4);
+  const n = weeks.length;
+  const slot = innerW / Math.max(n, 1);
+  const barW = Math.min(44, slot * 0.55);
+
+  const gridLevels = [0, 0.25, 0.5, 0.75, 1];
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full">
+      {gridLevels.map((frac, i) => {
+        const val = Math.round(maxTotal * frac);
+        const y = padT + innerH - innerH * frac;
+        return (
+          <g key={i}>
+            <line x1={padL} y1={y} x2={W - padR} y2={y} stroke="#e5e5e0" strokeWidth="1" />
+            <text x={padL - 8} y={y + 4} fontSize="11" fill="#898781" textAnchor="end">
+              {val}
+            </text>
+          </g>
+        );
+      })}
+
+      {weeks.map((w, i) => {
+        const x = padL + slot * i + (slot - barW) / 2;
+        let yCursor = padT + innerH;
+
+        return (
+          <g key={w.weekIndex}>
+            {activeCollabs.map((c) => {
+              const v = w.values[c.id] || 0;
+              if (v <= 0) return null;
+              const segH = innerH * (v / maxTotal);
+              yCursor -= segH;
+              return (
+                <rect
+                  key={c.id}
+                  x={x}
+                  y={yCursor}
+                  width={barW}
+                  height={Math.max(segH - 1, 0)}
+                  fill={c.color}
+                  rx={2}
+                  className="transition-all hover:opacity-85"
+                >
+                  <title>{`${c.name} — Semana ${w.weekIndex}: ${v}${unit}`}</title>
+                </rect>
+              );
+            })}
+            <text
+              x={x + barW / 2}
+              y={padT + innerH + 18}
+              fontSize="12"
+              fontWeight="500"
+              fill="#52514e"
+              textAnchor="middle"
+            >
+              S{w.weekIndex}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
   );
 };

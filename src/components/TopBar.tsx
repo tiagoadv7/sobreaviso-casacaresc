@@ -76,8 +76,8 @@ export const TopBar: React.FC<TopBarProps> = ({
         <img src="/logo.svg" alt="Casacaresc" className="w-32 h-auto" />
       </div>
 
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex flex-col items-center gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
+      <div className="flex items-center justify-center gap-3 min-w-0 text-center lg:text-left lg:justify-start">
         <div className="min-w-0">
           <h1 id="page-title" className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight truncate">
             {currentInfo.title}
@@ -88,7 +88,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-center gap-2.5 flex-wrap">
         {/* Adicionar colaborador — apenas admin na aba colaboradores */}
         {currentTab === 'colaboradores' && isAdmin && (
           <button
@@ -112,8 +112,8 @@ export const TopBar: React.FC<TopBarProps> = ({
                 onClick={() => setIsExportOpen((v) => !v)}
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-medium bg-[#fcfcfb] text-neutral-800 border border-black/10 hover:bg-[#f4f4f1] transition-all duration-200 cursor-pointer shadow-2xs active:scale-[0.97]"
               >
-                <Download className="w-3.5 h-3.5 text-neutral-500" />
-                <span className="hidden sm:inline">Exportar</span>
+                <Download className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                <span>Exportar</span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${isExportOpen ? 'rotate-180' : ''}`}
                 />
@@ -149,8 +149,8 @@ export const TopBar: React.FC<TopBarProps> = ({
               onClick={onPrint}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-medium bg-neutral-900 text-white hover:bg-neutral-800 transition-all cursor-pointer shadow-2xs"
             >
-              <Printer className="w-3.5 h-3.5 text-neutral-300" />
-              <span className="hidden sm:inline">Imprimir / PDF</span>
+              <Printer className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
+              <span>Imprimir / PDF</span>
             </button>
           </>
         )}
