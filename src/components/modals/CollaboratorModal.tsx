@@ -148,7 +148,7 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Nome */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Nome *
             </label>
             <input
@@ -157,13 +157,13 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
             />
           </div>
 
           {/* Função */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Função
             </label>
             <input
@@ -171,14 +171,14 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
               placeholder="Ex: Analista de suporte"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
             />
           </div>
 
           {/* Matrícula & Contato */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Matrícula
               </label>
               <input
@@ -186,12 +186,12 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
                 placeholder="Ex: 0007"
                 value={matricula}
                 onChange={(e) => setMatricula(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Contato
               </label>
               <input
@@ -199,14 +199,14 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
                 placeholder="(11) 90000-0000"
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
               />
             </div>
           </div>
 
           {/* Status com Rounded Custom Select */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Status
             </label>
             <CustomSelect
@@ -220,7 +220,7 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
           {/* Nome do status personalizado — só aparece quando selecionado acima */}
           {status === 'personalizado' && (
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 text-center">
                 Nome do status *
               </label>
               <input
@@ -228,14 +228,14 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
                 placeholder="Ex: Atestado médico"
                 value={customStatusLabel}
                 onChange={(e) => setCustomStatusLabel(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
               />
             </div>
           )}
 
           {/* Cor (Swatches) */}
           <div className="space-y-1.5 text-center">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Cor do colaborador
             </label>
             <div className="flex flex-wrap justify-center gap-2 pt-1">
@@ -257,7 +257,7 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
 
           {/* Observação */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 text-center">
               Observação (opcional)
             </label>
             <input
@@ -265,7 +265,7 @@ export const CollaboratorModal: React.FC<CollaboratorModalProps> = ({
               placeholder="Ex: Apoio nos domingos"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
             />
           </div>
 

@@ -100,7 +100,7 @@ export const TimeSelect: React.FC<TimeSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`w-full flex items-center gap-2 px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 transition-all text-left shadow-2xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#319685]/30 ${
+        className={`w-full flex items-center justify-center gap-2 px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 transition-all shadow-2xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#319685]/30 ${
           isOpen ? 'ring-2 ring-[#319685] border-transparent' : 'hover:border-black/20'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >

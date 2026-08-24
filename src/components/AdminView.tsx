@@ -45,7 +45,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left">
+      <div className="flex flex-col items-center gap-3 text-center">
         <div className="w-10 h-10 rounded-2xl bg-[#319685]/15 flex items-center justify-center shrink-0">
           <ShieldCheck className="w-5 h-5 text-[#084F42]" />
         </div>
@@ -56,7 +56,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex gap-1 p-1 bg-neutral-100 rounded-2xl w-fit mx-auto sm:mx-0">
+      <div className="flex gap-1 p-1 bg-neutral-100 rounded-2xl w-fit mx-auto">
         {(
           [
             { id: 'usuarios', label: 'Usuários do sistema', icon: <KeyRound className="w-3.5 h-3.5" /> },
@@ -483,12 +483,10 @@ const CreateUserModal: React.FC<{
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl w-full max-w-md p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-base font-bold text-neutral-900">Criar novo usuário</h3>
-            <p className="text-xs text-neutral-400 mt-0.5">O usuário receberá acesso ao sistema com estas credenciais.</p>
-          </div>
-          <button type="button" onClick={onClose} className="p-2 rounded-xl text-neutral-400 hover:bg-neutral-100 cursor-pointer">
+        <div className="relative text-center">
+          <h3 className="text-base font-bold text-neutral-900">Criar novo usuário</h3>
+          <p className="text-xs text-neutral-400 mt-0.5">O usuário receberá acesso ao sistema com estas credenciais.</p>
+          <button type="button" onClick={onClose} className="absolute right-0 top-0 p-2 rounded-xl text-neutral-400 hover:bg-neutral-100 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -532,29 +530,29 @@ const CreateUserModal: React.FC<{
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Nome */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Nome completo *</label>
+            <label className="block text-xs font-semibold text-neutral-700 text-center">Nome completo *</label>
             <input type="text" placeholder="Ex: Fernanda Silva" value={displayName}
               onChange={(e) => setDisplayName(e.target.value)} required
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
           </div>
 
           {/* Email */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
+            <label className="block text-xs font-semibold text-neutral-700 flex items-center justify-center gap-1.5">
               <Mail className="w-3.5 h-3.5 text-[#319685]" /> E-mail *
             </label>
             <input type="email" placeholder="email@casacaresc.org.br" value={email}
               onChange={(e) => setEmail(e.target.value)} required
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
           </div>
 
           {/* Senha */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Senha inicial * (mín. 6 caracteres)</label>
+            <label className="block text-xs font-semibold text-neutral-700 text-center">Senha inicial * (mín. 6 caracteres)</label>
             <div className="relative">
               <input type={showPw ? 'text' : 'password'} placeholder="••••••••" value={password}
                 onChange={(e) => setPassword(e.target.value)} required
-                className="w-full pl-3.5 pr-10 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+                className="w-full pl-10 pr-10 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
               <button type="button" onClick={() => setShowPw((v) => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer">
                 {showPw ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -575,7 +573,7 @@ const CreateUserModal: React.FC<{
 
           {/* Função / Role */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Função no sistema *</label>
+            <label className="block text-xs font-semibold text-neutral-700 text-center">Função no sistema *</label>
             <div className="flex gap-2">
               {(['colaborador', 'admin'] as UserRole[]).map((r) => (
                 <button key={r} type="button" onClick={() => setRole(r)}
@@ -594,7 +592,7 @@ const CreateUserModal: React.FC<{
           </div>
 
           {/* Vincular colaborador */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 text-center">
             <label className="block text-xs font-semibold text-neutral-700">Vincular a colaborador existente (opcional)</label>
             <p className="text-[11px] text-neutral-400 -mt-0.5">
               Se deixar em "— Nenhum —", um colaborador novo com o nome acima é criado automaticamente.
@@ -615,10 +613,10 @@ const CreateUserModal: React.FC<{
               acima, a matrícula dele é editada na tela de Colaboradores). */}
           {!collaboratorId && (
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-neutral-700">Matrícula (opcional)</label>
+              <label className="block text-xs font-semibold text-neutral-700 text-center">Matrícula (opcional)</label>
               <input type="text" placeholder="Ex: 0007" value={matricula}
                 onChange={(e) => setMatricula(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
             </div>
           )}
 
@@ -687,31 +685,29 @@ const EditUserModal: React.FC<{
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl w-full max-w-sm p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-base font-bold text-neutral-900">Editar usuário</h3>
-            <p className="text-xs text-neutral-400 mt-0.5">{user.email}</p>
-          </div>
-          <button type="button" onClick={onClose} className="p-2 rounded-xl text-neutral-400 hover:bg-neutral-100 cursor-pointer">
+        <div className="relative text-center">
+          <h3 className="text-base font-bold text-neutral-900">Editar usuário</h3>
+          <p className="text-xs text-neutral-400 mt-0.5">{user.email}</p>
+          <button type="button" onClick={onClose} className="absolute right-0 top-0 p-2 rounded-xl text-neutral-400 hover:bg-neutral-100 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {saved && (
-          <div className="text-xs text-emerald-700 bg-emerald-50 p-3 rounded-2xl border border-emerald-200 flex items-center gap-2">
+          <div className="text-xs text-emerald-700 bg-emerald-50 p-3 rounded-2xl border border-emerald-200 flex items-center justify-center gap-2">
             <CheckCircle2 className="w-3.5 h-3.5" /> Alterações salvas!
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Nome de exibição</label>
+            <label className="block text-xs font-semibold text-neutral-700 text-center">Nome de exibição</label>
             <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-neutral-700">Vincular a colaborador</label>
+            <label className="block text-xs font-semibold text-neutral-700 text-center">Vincular a colaborador</label>
             <CustomSelect
               options={[
                 { value: '', label: '— Nenhum —' },
@@ -736,7 +732,7 @@ const EditUserModal: React.FC<{
           </label>
 
           <div className="space-y-2 pt-3.5 border-t border-black/5">
-            <p className="text-xs font-semibold text-neutral-700">Senha</p>
+            <p className="text-xs font-semibold text-neutral-700 text-center">Senha</p>
             <button
               type="button"
               onClick={handleSendReset}

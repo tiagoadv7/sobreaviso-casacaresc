@@ -99,7 +99,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Registration Action Card */}
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left hover:border-black/20 transition-all">
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col items-center gap-4 text-center hover:border-black/20 transition-all">
         <div>
           <h2 className="text-base font-bold text-neutral-900">
             Cadastro e Histórico de Demandas
@@ -123,7 +123,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex items-end gap-3.5 flex-wrap hover:border-black/20 transition-all">
         {/* Search */}
         <div className="flex flex-col gap-1.5 w-full sm:flex-1 sm:min-w-[220px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center sm:text-left">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center">
             Buscar por nome / beneficiário
           </label>
           <div className="relative">
@@ -133,14 +133,14 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
               placeholder="Digite o contato, beneficiário ou motivo..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+              className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
             />
           </div>
         </div>
 
         {/* Colaborador */}
         <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[190px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center sm:text-left">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center">
             Colaborador
           </label>
           <CustomSelect
@@ -153,7 +153,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
 
         {/* Demanda */}
         <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[190px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center sm:text-left">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center">
             Demanda
           </label>
           <CustomSelect
@@ -166,7 +166,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
 
         {/* Status */}
         <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[160px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center sm:text-left">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center">
             Status
           </label>
           <CustomSelect
@@ -190,7 +190,7 @@ export const DemandasView: React.FC<DemandasViewProps> = ({
       </div>
 
       {/* Summary Chips */}
-      <div className="flex items-center justify-center sm:justify-start flex-wrap gap-3 text-xs text-neutral-600 font-medium">
+      <div className="flex items-center justify-center flex-wrap gap-3 text-xs text-neutral-600 font-medium">
         <span className="bg-white px-3.5 py-1.5 rounded-2xl border border-black/10 shadow-2xs">
           Exibindo <b>{totalCalls}</b> demandas
         </span>

@@ -76,8 +76,8 @@ export const TopBar: React.FC<TopBarProps> = ({
         <img src="/logo.svg" alt="Casacaresc" className="w-32 h-auto" />
       </div>
 
-      <div className="flex flex-col items-center gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
-      <div className="flex items-center justify-center gap-3 min-w-0 text-center lg:text-left lg:justify-start">
+      <div className="flex flex-col items-center gap-3">
+      <div className="flex items-center justify-center gap-3 min-w-0 text-center">
         <div className="min-w-0">
           <h1 id="page-title" className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight truncate">
             {currentInfo.title}

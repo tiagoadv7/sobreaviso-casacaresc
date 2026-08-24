@@ -102,9 +102,9 @@ export const CalculoHorasView: React.FC<CalculoHorasViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Filter Bar */}
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex items-end gap-3.5 flex-wrap hover:border-black/20 transition-all">
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-5 shadow-xs flex items-end justify-center gap-3.5 flex-wrap hover:border-black/20 transition-all">
         <div className="flex flex-col gap-1.5 min-w-[260px]">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 text-center">
             Filtrar por Colaborador
           </label>
           <CustomSelect
@@ -130,7 +130,7 @@ export const CalculoHorasView: React.FC<CalculoHorasViewProps> = ({
       {/* 3 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
-          <div className="flex items-center justify-center gap-2 sm:justify-between">
+          <div className="flex items-center justify-center gap-2">
             <span className="text-xs font-medium text-neutral-500">Atendimentos no mês</span>
             <div className="w-9 h-9 rounded-2xl bg-[#319685]/15 text-[#084F42] flex items-center justify-center shadow-2xs shrink-0">
               <PhoneCall className="w-4 h-4" />
@@ -140,14 +140,14 @@ export const CalculoHorasView: React.FC<CalculoHorasViewProps> = ({
             <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
               {totalAtendimentos}
             </div>
-            <div className="text-[11px] text-neutral-400 mt-0.5 text-center sm:text-left">
+            <div className="text-[11px] text-neutral-400 mt-0.5 text-center">
               Demandas consideradas no cálculo
             </div>
           </div>
         </div>
 
         <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
-          <div className="flex items-center justify-center gap-2 sm:justify-between">
+          <div className="flex items-center justify-center gap-2">
             <span className="text-xs font-medium text-neutral-500">Horas extras totais</span>
             <div className="w-9 h-9 rounded-2xl bg-[#EE7870]/20 text-[#E84A4E] flex items-center justify-center shadow-2xs shrink-0">
               <Sigma className="w-4 h-4" />
@@ -157,14 +157,14 @@ export const CalculoHorasView: React.FC<CalculoHorasViewProps> = ({
             <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
               {fmtHours(totalHE)}h
             </div>
-            <div className="text-[11px] text-neutral-400 mt-0.5 text-center sm:text-left">
+            <div className="text-[11px] text-neutral-400 mt-0.5 text-center">
               Soma de HE 75% e HE 100%
             </div>
           </div>
         </div>
 
         <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col justify-between hover:border-black/20 transition-all">
-          <div className="flex items-center justify-center gap-2 sm:justify-between">
+          <div className="flex items-center justify-center gap-2">
             <span className="text-xs font-medium text-neutral-500">Horas de sobreaviso</span>
             <div className="w-9 h-9 rounded-2xl bg-[#6BC0B2]/20 text-[#319685] flex items-center justify-center shadow-2xs shrink-0">
               <Clock className="w-4 h-4" />
@@ -174,7 +174,7 @@ export const CalculoHorasView: React.FC<CalculoHorasViewProps> = ({
             <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
               {fmtHours(totalSobreaviso)}h
             </div>
-            <div className="text-[11px] text-neutral-400 mt-0.5 text-center sm:text-left">
+            <div className="text-[11px] text-neutral-400 mt-0.5 text-center">
               Turnos de plantão no mês
             </div>
           </div>
@@ -183,7 +183,7 @@ export const CalculoHorasView: React.FC<CalculoHorasViewProps> = ({
 
       {/* Horas extras por colaboradora */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs hover:border-black/20 transition-all">
-        <div className="mb-4 text-center sm:text-left">
+        <div className="mb-4 text-center">
           <h2 className="text-sm font-bold text-neutral-900">Horas extras por colaboradora</h2>
           <p className="text-xs text-neutral-400">
             Calculado a partir dos horários de início e fim de cada atendimento (chamado) registrado no mês
@@ -214,11 +214,11 @@ export const CalculoHorasView: React.FC<CalculoHorasViewProps> = ({
 
       {/* Como os valores são calculados Legend */}
       <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs space-y-3 hover:border-black/20 transition-all">
-        <div className="flex items-center justify-center gap-2 sm:justify-start text-center sm:text-left">
+        <div className="flex items-center justify-center gap-2 text-center">
           <Info className="w-4 h-4 text-[#2a78d6] shrink-0" />
           <h2 className="text-sm font-bold text-neutral-900">Como os valores são calculados</h2>
         </div>
-        <p className="text-xs text-neutral-400 text-center sm:text-left">
+        <p className="text-xs text-neutral-400 text-center">
           Referência das colunas da planilha &quot;Informações de horas de sobreaviso e horas extras&quot;
         </p>
 

@@ -277,7 +277,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
             <button
               type="button"
               onClick={() => setIsDemandPickerOpen(!isDemandPickerOpen)}
-              className="w-full px-3.5 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 flex items-center justify-between hover:border-black/20 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 cursor-pointer shadow-2xs"
+              className="relative w-full pl-8 pr-8 py-2.5 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 flex items-center justify-center hover:border-black/20 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 cursor-pointer shadow-2xs"
             >
               {currentDemand ? (
                 <span
@@ -289,7 +289,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
               ) : (
                 <span className="text-neutral-400">Selecionar demanda</span>
               )}
-              <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
+              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
             </button>
 
             {/* Dropdown Panel com Rounded 2xl */}
@@ -375,7 +375,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
                 placeholder="Ex: Márcia Souza"
                 value={contato}
                 onChange={(e) => setContato(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
               />
             </div>
 
@@ -388,7 +388,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
                 placeholder="Ex: João Pedro Alves"
                 value={beneficiario}
                 onChange={(e) => setBeneficiario(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+                className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
               />
             </div>
           </div>
@@ -403,7 +403,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
               placeholder="Ex: Encaminhamento hospitalar"
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs"
             />
           </div>
 
@@ -417,7 +417,7 @@ export const DemandModal: React.FC<DemandModalProps> = ({
               value={observacao}
               onChange={(e) => setObservacao(e.target.value)}
               rows={2}
-              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs resize-none"
+              className="w-full px-3.5 py-2 rounded-2xl border border-black/10 bg-[#fcfcfb] text-xs font-medium text-neutral-900 text-center focus:outline-none focus:ring-2 focus:ring-[#319685]/30 shadow-2xs resize-none"
             />
           </div>
 
