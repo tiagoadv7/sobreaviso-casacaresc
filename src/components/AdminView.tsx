@@ -45,8 +45,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-[#319685]/15 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left">
+        <div className="w-10 h-10 rounded-2xl bg-[#319685]/15 flex items-center justify-center shrink-0">
           <ShieldCheck className="w-5 h-5 text-[#084F42]" />
         </div>
         <div>
@@ -56,7 +56,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex gap-1 p-1 bg-neutral-100 rounded-2xl w-fit">
+      <div className="flex gap-1 p-1 bg-neutral-100 rounded-2xl w-fit mx-auto sm:mx-0">
         {(
           [
             { id: 'usuarios', label: 'Usuários do sistema', icon: <KeyRound className="w-3.5 h-3.5" /> },

@@ -37,7 +37,7 @@ export const ColaboradoresView: React.FC<ColaboradoresViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Banner / Add card */}
-      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex items-center justify-between gap-4 flex-wrap hover:border-black/20 transition-all">
+      <div className="bg-[#fcfcfb] border border-black/10 rounded-3xl p-6 shadow-xs flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left hover:border-black/20 transition-all">
         <div>
           <h2 className="text-base font-bold text-neutral-900">
             Equipe de Sobreaviso
