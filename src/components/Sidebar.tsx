@@ -166,9 +166,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
       <div className="space-y-2">
         {/* User card */}
         <div className="bg-white/90 border border-[#319685]/15 rounded-2xl p-2 lg:p-3.5 shadow-2xs">
-          <div className="flex flex-col lg:flex-row items-center gap-1.5 lg:gap-2.5 mb-2 lg:mb-3">
+          <button
+            type="button"
+            onClick={onOpenProfile}
+            title="Ver / editar meu perfil"
+            className="w-full flex flex-col lg:flex-row items-center gap-1.5 lg:gap-2.5 mb-2 lg:mb-3 cursor-pointer rounded-xl transition-colors hover:bg-[#DEEDE0]/40 -m-0.5 p-0.5"
+          >
             <div
-              title={session?.displayName ?? 'Usuário'}
               className={`w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                 role === 'admin'
                   ? 'bg-[#084F42] text-white'
@@ -177,7 +181,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
             >
               {initials}
             </div>
-            <div className="hidden lg:block min-w-0 flex-1">
+            <div className="hidden lg:block min-w-0 flex-1 text-left">
               <p className="text-xs font-bold text-neutral-900 truncate">
                 {session?.displayName ?? 'Usuário'}
               </p>
@@ -185,7 +189,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
                 {role === 'admin' ? '🛡️ Administrador' : '👤 Colaborador'}
               </p>
             </div>
-          </div>
+          </button>
 
           <div className="flex flex-col lg:flex-row gap-1.5">
             {/* Minha conta / Senha — visível para todos */}
