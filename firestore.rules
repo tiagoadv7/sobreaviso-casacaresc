@@ -80,5 +80,15 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
+
+    // ─── CONTAS EXCLUÍDAS (/deletedAccounts/{email}) ─────────────────────────
+    // Lista de bloqueio de e-mails excluídos pelo admin — o próprio fluxo de
+    // login (para qualquer usuário, admin ou não) precisa ler isto para
+    // negar acesso a uma conta excluída. Só admin pode marcar alguém como
+    // excluído.
+    match /deletedAccounts/{email} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
   }
 }

@@ -95,10 +95,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
 /* ─── Painel de Usuários Firebase ─── */
 const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators }) => {
   const { users, session, createUser, updateUserRole, updateUserCollaboratorLink,
-    updateUserDisplayName, setUserMustChangePassword, sendPasswordReset, disableUser, enableUser } = useAuth();
+    updateUserDisplayName, setUserMustChangePassword, sendPasswordReset, disableUser, enableUser,
+    deleteSystemUser } = useAuth();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingUser, setEditingUser] = useState<SystemUser | null>(null);
+  const [userPendingDelete, setUserPendingDelete] = useState<SystemUser | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
   const [feedback, setFeedback] = useState<{ uid: string; msg: string; type: 'ok' | 'err' } | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
@@ -194,6 +197,19 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
       showFeedback(user.uid, user.disabled ? 'Conta reativada.' : 'Conta desativada.');
     } catch {
       showFeedback(user.uid, 'Erro ao alterar status.', 'err');
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userPendingDelete) return;
+    setIsDeletingUser(true);
+    try {
+      await deleteSystemUser(userPendingDelete.uid, userPendingDelete.email);
+      setUserPendingDelete(null);
+    } catch {
+      showFeedback(userPendingDelete.uid, 'Erro ao excluir usuário.', 'err');
+    } finally {
+      setIsDeletingUser(false);
     }
   };
 
@@ -375,6 +391,19 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
                     {u.disabled ? 'Ativar' : 'Desativar'}
                   </button>
                 )}
+
+                {/* Excluir */}
+                {u.uid !== session?.uid && (
+                  <button
+                    id={`btn-delete-user-${u.uid}`}
+                    type="button"
+                    onClick={() => setUserPendingDelete(u)}
+                    title="Exclui o perfil e bloqueia o e-mail permanentemente"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-[#E84A4E]/20 text-[11px] font-semibold text-[#E84A4E] hover:bg-[#E84A4E]/10 transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3 h-3" /> Excluir
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -404,6 +433,21 @@ const UsersPanel: React.FC<{ collaborators: Collaborator[] }> = ({ collaborators
           onSendReset={sendPasswordReset}
         />
       )}
+
+      {/* Confirmação de exclusão de usuário */}
+      <ConfirmModal
+        isOpen={!!userPendingDelete}
+        title="Excluir usuário"
+        message={
+          userPendingDelete
+            ? `O perfil de "${userPendingDelete.displayName}" será removido e o e-mail ${userPendingDelete.email} ficará bloqueado permanentemente no sistema. A conta de login no Firebase não é apagada (limitação do acesso pelo navegador), mas nunca mais poderá ser usada para entrar aqui.`
+            : ''
+        }
+        confirmLabel="Excluir"
+        loading={isDeletingUser}
+        onConfirm={handleDeleteUser}
+        onClose={() => setUserPendingDelete(null)}
+      />
     </div>
   );
 };

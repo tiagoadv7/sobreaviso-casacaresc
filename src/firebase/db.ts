@@ -239,6 +239,35 @@ export async function updateUserProfile(uid: string, data: Partial<SystemUser>):
   await updateDoc(doc(db, 'users', uid), sanitized);
 }
 
+// O SDK client-side do Firebase não consegue apagar a conta de Auth de OUTRO
+// usuário (só a do próprio usuário logado) — isso exigiria um backend com o
+// Admin SDK. Como alternativa client-only: apagamos o perfil no Firestore E
+// guardamos o e-mail numa "lista negra" (deletedAccounts). Sem isso, a pessoa
+// ainda conseguiria logar com a senha antiga do Firebase Auth — o app cria um
+// perfil novo automaticamente para qualquer login sem perfil no Firestore
+// (ver AuthContext) — e "ressuscitaria" a conta.
+function normalizeEmailForBlocklist(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+export async function deleteUserProfile(uid: string): Promise<void> {
+  await deleteDoc(doc(db, 'users', uid));
+}
+
+export async function markEmailAsDeleted(email: string): Promise<void> {
+  const key = normalizeEmailForBlocklist(email);
+  await setDoc(doc(db, 'deletedAccounts', key), {
+    email: key,
+    deletedAt: new Date().toISOString(),
+  });
+}
+
+export async function isEmailDeleted(email: string): Promise<boolean> {
+  const key = normalizeEmailForBlocklist(email);
+  const snap = await getDoc(doc(db, 'deletedAccounts', key));
+  return snap.exists();
+}
+
 // ─── SEED & SYNC ─────────────────────────────────────────────────────────────
 
 import { INITIAL_CALLS } from '../utils/constants';

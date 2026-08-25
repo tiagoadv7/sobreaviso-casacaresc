@@ -19,6 +19,9 @@ import {
   saveUserProfile,
   subscribeUsers,
   updateUserProfile,
+  deleteUserProfile,
+  markEmailAsDeleted,
+  isEmailDeleted,
   seedInitialDataIfEmpty,
 } from '../firebase/db';
 import { adminCreateUser, adminSendPasswordReset } from '../firebase/adminSdk';
@@ -61,6 +64,7 @@ interface AuthContextValue {
   sendPasswordReset: (email: string) => Promise<void>;
   disableUser: (uid: string) => Promise<void>;
   enableUser: (uid: string) => Promise<void>;
+  deleteSystemUser: (uid: string, email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -84,6 +88,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const userEmail = (firebaseUser.email || '').toLowerCase().trim();
         const isPrimaryAdmin = userEmail === PRIMARY_ADMIN_EMAIL.toLowerCase();
+
+        // Conta excluída pelo admin: a senha do Firebase Auth continua válida
+        // (o SDK client-side não apaga a conta de OUTRO usuário), então
+        // bloqueamos aqui antes que o perfil seja recriado automaticamente.
+        if (!isPrimaryAdmin && userEmail && (await isEmailDeleted(userEmail))) {
+          await signOut(auth);
+          setSession(null);
+          setAuthLoading(false);
+          return;
+        }
 
         // Busca perfil no Firestore
         let profile = await getUserProfile(firebaseUser.uid);
@@ -223,6 +237,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await updateUserProfile(uid, { disabled: false });
   }, []);
 
+  // Exclusão "real" possível a partir do cliente: apaga o perfil no
+  // Firestore e bloqueia o e-mail para sempre (ver isEmailDeleted acima). A
+  // conta em si no Firebase Authentication continua existindo — só um
+  // backend com o Admin SDK conseguiria apagá-la de fato.
+  const deleteSystemUser = useCallback(async (uid: string, email: string) => {
+    await deleteUserProfile(uid);
+    await markEmailAsDeleted(email);
+  }, []);
+
   const isAdmin = session?.role === 'admin';
 
   return (
@@ -244,6 +267,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sendPasswordReset,
         disableUser,
         enableUser,
+        deleteSystemUser,
       }}
     >
       {children}
