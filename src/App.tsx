@@ -103,7 +103,7 @@ function LoadingScreen({ displayName }: { displayName?: string } = {}) {
       </div>
 
       <div className="flex flex-col items-center gap-1 text-center">
-        <p className="text-white text-lg font-bold tracking-tight">Sobreaviso</p>
+        <p className="text-white text-lg font-bold tracking-tight">Regulação</p>
         {displayName && (
           <p className="text-white text-sm font-bold">Bem-vindo(a), {displayName}!</p>
         )}

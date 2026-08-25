@@ -21,7 +21,7 @@ export async function exportXlsxFile(
   options: ExportXlsxOptions = {}
 ): Promise<void> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Sobreaviso Casacaresc';
+  workbook.creator = 'Regulação Casacaresc';
   workbook.created = new Date();
 
   const sheet = workbook.addWorksheet((options.sheetName || 'Dados').slice(0, 31));

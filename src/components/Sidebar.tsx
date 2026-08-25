@@ -96,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, onOpe
         <div className="hidden lg:flex flex-col items-center gap-2 px-2 pt-2 pb-6 text-center">
           <img src="/logo.svg" alt="Casacaresc" className="w-36 h-auto" />
           <div className="text-[15px] font-bold text-[#084F42] tracking-tight leading-tight">
-            Sobreaviso
+            Regulação
           </div>
         </div>
         <div className="lg:hidden h-2" />

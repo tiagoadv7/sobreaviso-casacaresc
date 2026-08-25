@@ -1,6 +1,6 @@
 {
-  "name": "Sobreaviso Casacaresc",
-  "description": "Sistema de gestão de escalas de sobreaviso, registro de demandas, cálculo de horas extras e adicional noturno e gestão de colaboradores.",
+  "name": "Regulação Casacaresc",
+  "description": "Sistema de gestão de escalas de regulação, registro de demandas, cálculo de horas extras e adicional noturno e gestão de colaboradores.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

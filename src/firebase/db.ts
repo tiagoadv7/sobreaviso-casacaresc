@@ -277,7 +277,7 @@ export async function forceSyncInitialData(): Promise<boolean> {
 
   // 4. System metadata
   batch.set(doc(db, 'systemSettings', 'general'), {
-    systemName: 'Sobreaviso Casacaresc',
+    systemName: 'Regulação Casacaresc',
     primaryAdmin: 'tiago.neves@casacaresc.org.br',
     updatedAt: new Date().toISOString(),
   });

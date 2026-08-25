@@ -145,7 +145,7 @@ export const LoginScreen: React.FC = () => {
           <div className="flex flex-col items-center gap-3 mb-6">
             <img src="/logo.svg" alt="Casacaresc" className="w-44 h-auto" />
             <h1 className="text-lg font-bold text-[#084F42] tracking-tight">
-              {view === 'login' ? 'Sobreaviso' : 'Recuperar senha'}
+              {view === 'login' ? 'Regulação' : 'Recuperar senha'}
             </h1>
           </div>
 
